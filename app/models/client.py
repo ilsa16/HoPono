@@ -9,7 +9,7 @@ class Client(db.Model):
     name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     phone = db.Column(db.String(30), nullable=False)
-    reminder_preference = db.Column(db.String(10), nullable=False, default="both")
+    reminder_preference = db.Column(db.String(10), nullable=False, default="email")
     gdpr_consent = db.Column(db.Boolean, nullable=False, default=False)
     gdpr_consented_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

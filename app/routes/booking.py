@@ -38,7 +38,7 @@ def confirm():
             client_name=request.form.get("name"),
             client_email=request.form.get("email"),
             client_phone=request.form.get("phone"),
-            reminder_preference=request.form.get("reminder_preference", "both"),
+            reminder_preference=request.form.get("reminder_preference", "email"),
             coupon_code=request.form.get("coupon_code"),
         )
         return redirect(url_for("booking.success", booking_id=booking.id))

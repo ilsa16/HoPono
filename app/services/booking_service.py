@@ -20,7 +20,7 @@ def create_booking(
     client_name,
     client_email,
     client_phone,
-    reminder_preference="both",
+    reminder_preference="email",
     coupon_code=None,
     source="online",
 ):

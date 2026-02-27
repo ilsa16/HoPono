@@ -86,8 +86,9 @@ migrations/             # Alembic migration files
 - `SECRET_KEY` — Flask session secret
 - `FLASK_ENV` — development/production
 - `ADMIN_USERNAME` / `ADMIN_PASSWORD` — Used by seed.py
-- `TELNYX_API_KEY` / `TELNYX_PHONE_NUMBER` — Optional, for SMS reminders
-- `SENDGRID_API_KEY` / `SENDGRID_FROM_EMAIL` — Optional, for email reminders
+- `SENDTO_API_KEY` — Send.to (sms.to) API key for SMS reminders (sender_id: "HoPono")
+- `BREVO_API_KEY` — Brevo API key for transactional email reminders
+- `BREVO_FROM_EMAIL` — Optional sender email (default: bookings@hoponomassage.com)
 
 ## Running
 The app runs via `flask db upgrade && python run.py` on port 5000. Database migrations auto-run on startup.
