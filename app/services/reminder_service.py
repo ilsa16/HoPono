@@ -1,5 +1,8 @@
 import os
 import logging
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import requests
 from datetime import datetime
 
@@ -41,40 +44,32 @@ def send_sms(phone, message):
 
 
 def send_email(to_email, subject, html_content):
-    """Send an email via Brevo (formerly Sendinblue) transactional email API."""
-    api_key = os.environ.get("BREVO_API_KEY")
+    """Send an email via Brevo SMTP relay."""
+    smtp_login = os.environ.get("BREVO_SMTP_LOGIN")
+    smtp_password = os.environ.get("BREVO_API_KEY")
     from_email = os.environ.get("BREVO_FROM_EMAIL", "bookings@hoponomassage.com")
+    from_name = "HoPono Massage"
 
-    if not api_key:
-        logger.warning("Brevo not configured (BREVO_API_KEY missing). Skipping email to %s", to_email)
+    if not smtp_login or not smtp_password:
+        logger.warning("Brevo SMTP not configured (BREVO_SMTP_LOGIN or BREVO_API_KEY missing). Skipping email to %s", to_email)
         return False
 
     try:
-        import sib_api_v3_sdk
-        from sib_api_v3_sdk.rest import ApiException
+        msg = MIMEMultipart("alternative")
+        msg["From"] = f"{from_name} <{from_email}>"
+        msg["To"] = to_email
+        msg["Subject"] = subject
+        msg.attach(MIMEText(html_content, "html"))
 
-        configuration = sib_api_v3_sdk.Configuration()
-        configuration.api_key["api-key"] = api_key
+        with smtplib.SMTP("smtp-relay.brevo.com", 587) as server:
+            server.starttls()
+            server.login(smtp_login, smtp_password)
+            server.send_message(msg)
 
-        api_instance = sib_api_v3_sdk.TransactionalEmailsApi(
-            sib_api_v3_sdk.ApiClient(configuration)
-        )
-
-        send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
-            to=[{"email": to_email}],
-            sender={"name": "HoPono Massage", "email": from_email},
-            subject=subject,
-            html_content=html_content,
-        )
-
-        api_response = api_instance.send_transac_email(send_smtp_email)
-        logger.info("Email sent to %s via Brevo (message_id: %s)", to_email, api_response.message_id)
+        logger.info("Email sent to %s via Brevo SMTP", to_email)
         return True
-    except ApiException as e:
-        logger.error("Brevo API error sending email to %s: %s", to_email, e)
-        return False
     except Exception as e:
-        logger.error("Failed to send email to %s via Brevo: %s", to_email, e)
+        logger.error("Failed to send email to %s via Brevo SMTP: %s", to_email, e)
         return False
 
 
