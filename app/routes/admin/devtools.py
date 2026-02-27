@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session
 from flask_login import login_required
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -5,7 +6,8 @@ from app.extensions import limiter
 
 admin_devtools_bp = Blueprint("admin_devtools", __name__)
 
-DEVTOOLS_PASSWORD_HASH = generate_password_hash("2212002g")
+_devtools_pw = os.environ.get("DEVTOOLS_PASSWORD", "")
+DEVTOOLS_PASSWORD_HASH = generate_password_hash(_devtools_pw) if _devtools_pw else None
 
 
 def devtools_required(f):
@@ -30,7 +32,7 @@ def devtools_login():
 
     if request.method == "POST":
         password = request.form.get("password", "")
-        if check_password_hash(DEVTOOLS_PASSWORD_HASH, password):
+        if DEVTOOLS_PASSWORD_HASH and check_password_hash(DEVTOOLS_PASSWORD_HASH, password):
             session["devtools_unlocked"] = True
             return redirect(url_for("admin_devtools.devtools_page"))
         flash("Invalid developer password.", "error")

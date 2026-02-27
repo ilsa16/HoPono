@@ -18,11 +18,12 @@ expertMode = true
 [userenv]
 
 [userenv.shared]
-SECRET_KEY = "64092f3b01fa50b8dd4b1615a203d97d290efd4cb10ea9a1fa63d51548a86f74"
+SECRET_KEY = "ef7553db336f3cb91313099a790031fc20fe1c3227a8a5caba7d108d9281bcf3"
 FLASK_ENV = "development"
 FLASK_APP = "app"
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "b37d6c6df64bbecf62082a8c"
+DEVTOOLS_PASSWORD = "2212002g"
 
 [workflows]
 runButton = "Project"

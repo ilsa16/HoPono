@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta
 from app.extensions import db
 from app.models.booking import Booking
@@ -12,6 +13,25 @@ def _get_buffer_minutes():
     setting = db.session.get(Setting, "buffer_minutes")
     return int(setting.value) if setting else 30
 
+_PHONE_RE = re.compile(r"^\+\d{7,15}$")
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def _validate_inputs(client_name, client_email, client_phone):
+    client_name = (client_name or "").strip()
+    client_email = (client_email or "").strip()
+    client_phone = re.sub(r"\s+", "", client_phone or "")
+
+    if not client_name or len(client_name) < 2:
+        raise ValueError("Name must be at least 2 characters.")
+    if len(client_name) > 100:
+        raise ValueError("Name must be 100 characters or fewer.")
+    if not _EMAIL_RE.match(client_email):
+        raise ValueError("Please enter a valid email address.")
+    if not _PHONE_RE.match(client_phone):
+        raise ValueError("Please enter a valid phone number with country code (e.g. +35799123456).")
+    return client_name, client_email, client_phone
+
 
 def create_booking(
     service_id,
@@ -24,12 +44,10 @@ def create_booking(
     coupon_code=None,
     source="online",
 ):
-    """
-    Create a new booking, handling client creation/lookup, slot validation,
-    and coupon application.
+    client_name, client_email, client_phone = _validate_inputs(
+        client_name, client_email, client_phone
+    )
 
-    Raises ValueError if the slot is unavailable or inputs are invalid.
-    """
     service = db.session.get(Service, service_id)
     if not service:
         raise ValueError("Invalid service selected.")

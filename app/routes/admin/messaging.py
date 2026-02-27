@@ -1,9 +1,19 @@
+import re
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_required
 from app.routes.admin.devtools import devtools_required
 from app.services.reminder_service import send_sms, send_email
 
 admin_messaging_bp = Blueprint("admin_messaging", __name__)
+
+_DANGEROUS_TAGS = re.compile(r"<\s*\/?\s*(script|iframe|object|embed|form|meta|link|base)\b[^>]*>", re.IGNORECASE)
+_EVENT_HANDLERS = re.compile(r"\bon\w+\s*=", re.IGNORECASE)
+
+
+def _sanitize_html(html):
+    html = _DANGEROUS_TAGS.sub("", html)
+    html = _EVENT_HANDLERS.sub("", html)
+    return html
 
 
 @admin_messaging_bp.route("/")
@@ -42,6 +52,7 @@ def send_test_email():
         flash("Email address, subject, and message are all required.", "error")
         return redirect(url_for("admin_messaging.messaging_page"))
 
+    html_content = _sanitize_html(html_content)
     success = send_email(to_email, subject, html_content)
     if success:
         flash(f"Test email sent successfully to {to_email}.", "success")

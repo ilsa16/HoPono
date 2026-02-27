@@ -20,8 +20,14 @@ A Flask-based booking and management system for HoPono Massage, a massage therap
 - **CSRF**: Flask-WTF CSRFProtect (form tokens + X-CSRFToken header for AJAX)
 - **Rate Limiting**: Flask-Limiter (in-memory, 60/min global; 5/min login; 5/min+30/hr booking; 10/min coupon validation)
 - **Brute Force Protection**: IP-based lockout after 5 failed admin login attempts within 15 minutes
-- **Bot Protection**: Honeypot field + timing-based detection (< 3s = bot) on booking forms
-- **Developer Tools**: Separate password gate behind admin auth (double authentication layer)
+- **Bot Protection**: Honeypot field + timing-based detection (< 3s or > 2hr = bot) on booking forms
+- **Developer Tools**: Separate password gate behind admin auth (double authentication layer); password from `DEVTOOLS_PASSWORD` env var
+- **Session Security**: HttpOnly cookies, SameSite=Lax, 1-hour session lifetime, Secure flag in production
+- **Secret Key**: Required from `SECRET_KEY` env var (no hardcoded fallback); app refuses to start without it
+- **Input Validation**: Server-side phone (+country code, 7-15 digits), email format, name length (2-100) validation in booking_service
+- **Probe Blocker**: WordPress/CMS/PHP paths blocked at `before_request` level; custom 403 page
+- **HTML Sanitization**: Devtools messaging strips script/iframe/event handler tags before sending emails
+- **Proxy Support**: ProxyFix middleware for real client IP behind reverse proxies
 
 ## Project Structure
 ```
