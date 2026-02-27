@@ -2,24 +2,24 @@
 {% block title %}Admin Login — HoPono{% endblock %}
 
 {% block content %}
-<section class="min-h-[60vh] flex items-center justify-center py-20 bg-gray-50">
+<section class="min-h-[60vh] flex items-center justify-center py-20">
     <div class="w-full max-w-sm mx-auto px-4">
-        <div class="bg-white rounded-2xl shadow-lg p-8">
-            <h1 class="text-2xl font-heading font-semibold text-hopono-blue-deeper text-center mb-6">Admin Login</h1>
+        <div class="bg-hopono-surface border border-white/5 rounded-2xl shadow-lg p-8">
+            <h1 class="text-2xl font-heading font-semibold text-white text-center mb-6">Admin Login</h1>
             <form method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <label class="block text-sm font-medium text-white/60 mb-1">Username</label>
                     <input type="text" name="username" required autofocus
-                           class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-hopono-blue focus:border-transparent">
+                           class="w-full bg-hopono-dark border border-white/10 rounded-lg px-4 py-3 focus:ring-2 focus:ring-hopono-gold focus:border-transparent text-white placeholder-white/20">
                 </div>
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <label class="block text-sm font-medium text-white/60 mb-1">Password</label>
                     <input type="password" name="password" required
-                           class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-hopono-blue focus:border-transparent">
+                           class="w-full bg-hopono-dark border border-white/10 rounded-lg px-4 py-3 focus:ring-2 focus:ring-hopono-gold focus:border-transparent text-white placeholder-white/20">
                 </div>
                 <button type="submit"
-                        class="w-full bg-hopono-blue hover:bg-hopono-blue-dark text-white font-semibold py-3 rounded-lg transition">
+                        class="w-full bg-hopono-gold hover:bg-hopono-gold-light text-hopono-dark font-semibold py-3 rounded-lg transition duration-300">
                     Log In
                 </button>
             </form>

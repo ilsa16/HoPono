@@ -2,31 +2,34 @@
 {% block title %}About — HoPono Massage Studio{% endblock %}
 
 {% block content %}
-<!-- Hero -->
-<section class="bg-gradient-to-br from-hopono-blue-deeper to-hopono-blue py-20">
-    <div class="max-w-4xl mx-auto px-4 text-center">
-        <h1 class="text-4xl sm:text-5xl font-heading font-light text-white mb-4">About HoPono</h1>
-        <p class="text-white/70 text-lg">The story behind our practice</p>
+<section class="relative py-24 sm:py-32 overflow-hidden">
+    <div class="absolute inset-0">
+        <img src="{{ url_for('static', filename='images/about_massage.jpg') }}" alt="" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-hopono-dark/85"></div>
+    </div>
+    <div class="relative max-w-4xl mx-auto px-4 text-center">
+        <h1 class="text-4xl sm:text-5xl font-heading font-light text-white mb-4 fade-up">About HoPono</h1>
+        <p class="text-white/50 text-lg fade-up stagger-1">The story behind our practice</p>
     </div>
 </section>
 
-<section class="py-20 bg-white">
+<section class="py-20 bg-hopono-dark">
     <div class="max-w-4xl mx-auto px-4">
         <div class="prose prose-lg max-w-none">
-            <div class="bg-hopono-cream rounded-2xl p-10 mb-12">
-                <h2 class="text-2xl font-heading font-semibold text-hopono-blue-deeper mb-6">Meet Evthoras</h2>
-                <p class="text-gray-600 leading-relaxed mb-4">
+            <div class="bg-hopono-surface border border-white/5 rounded-2xl p-10 mb-12 fade-up">
+                <h2 class="text-2xl font-heading font-semibold text-white mb-6">Meet Evthoras</h2>
+                <p class="text-white/50 leading-relaxed mb-4">
                     With a deep passion for holistic wellness and years of dedicated practice,
                     Evthoras brings a unique blend of Eastern and Western massage traditions
                     to every session at HoPono.
                 </p>
-                <p class="text-gray-600 leading-relaxed mb-4">
+                <p class="text-white/50 leading-relaxed mb-4">
                     Trained in Indian Ayurveda, Chinese acupressure, Thai massage, deep tissue
                     techniques, and traditional cupping therapy, Evthoras crafts each session
                     to address the individual needs of every client.
                 </p>
                 <blockquote class="border-l-4 border-hopono-gold pl-6 my-8">
-                    <p class="text-hopono-blue-deeper text-xl italic font-light">
+                    <p class="text-white/80 text-xl italic font-light">
                         &ldquo;It is my pleasure to be a part of your journey towards wellness.
                         Each person's body tells a unique story, and my role is to listen
                         and respond with care.&rdquo;
@@ -37,39 +40,39 @@
                 </blockquote>
             </div>
 
-            <h2 class="text-2xl font-heading font-semibold text-hopono-blue-deeper mb-6">Our Philosophy</h2>
-            <p class="text-gray-600 leading-relaxed mb-4">
+            <h2 class="text-2xl font-heading font-semibold text-white mb-6 fade-up">Our Philosophy</h2>
+            <p class="text-white/50 leading-relaxed mb-4 fade-up">
                 "HoPono" draws inspiration from the Hawaiian concept of harmony and balance.
                 We believe that true wellness comes from restoring equilibrium &mdash; between
                 body and mind, tension and release, activity and rest.
             </p>
-            <p class="text-gray-600 leading-relaxed mb-4">
+            <p class="text-white/50 leading-relaxed mb-4 fade-up">
                 Every treatment at our studio is designed not just to address physical tension,
                 but to create a complete experience of tranquility. From the moment you walk in,
                 you're stepping into a space dedicated entirely to your well-being.
             </p>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 my-12">
-                <div class="bg-hopono-cream rounded-xl p-6 text-center">
+                <div class="bg-hopono-surface border border-white/5 rounded-xl p-6 text-center fade-up stagger-1 hover:border-hopono-gold/20 transition duration-300">
                     <div class="text-3xl text-hopono-gold mb-2">&#9775;</div>
-                    <h3 class="font-heading font-semibold text-hopono-blue-deeper mb-2">Balance</h3>
-                    <p class="text-gray-500 text-sm">Restoring harmony between body and mind</p>
+                    <h3 class="font-heading font-semibold text-white mb-2">Balance</h3>
+                    <p class="text-white/40 text-sm">Restoring harmony between body and mind</p>
                 </div>
-                <div class="bg-hopono-cream rounded-xl p-6 text-center">
+                <div class="bg-hopono-surface border border-white/5 rounded-xl p-6 text-center fade-up stagger-2 hover:border-hopono-gold/20 transition duration-300">
                     <div class="text-3xl text-hopono-gold mb-2">&#10084;</div>
-                    <h3 class="font-heading font-semibold text-hopono-blue-deeper mb-2">Care</h3>
-                    <p class="text-gray-500 text-sm">Personalized attention for every client</p>
+                    <h3 class="font-heading font-semibold text-white mb-2">Care</h3>
+                    <p class="text-white/40 text-sm">Personalized attention for every client</p>
                 </div>
-                <div class="bg-hopono-cream rounded-xl p-6 text-center">
+                <div class="bg-hopono-surface border border-white/5 rounded-xl p-6 text-center fade-up stagger-3 hover:border-hopono-gold/20 transition duration-300">
                     <div class="text-3xl text-hopono-gold mb-2">&#9734;</div>
-                    <h3 class="font-heading font-semibold text-hopono-blue-deeper mb-2">Tradition</h3>
-                    <p class="text-gray-500 text-sm">Time-tested techniques from around the world</p>
+                    <h3 class="font-heading font-semibold text-white mb-2">Tradition</h3>
+                    <p class="text-white/40 text-sm">Time-tested techniques from around the world</p>
                 </div>
             </div>
 
-            <div class="text-center mt-12">
+            <div class="text-center mt-12 fade-up">
                 <a href="{{ url_for('booking.select_service') }}"
-                   class="inline-block bg-hopono-blue hover:bg-hopono-blue-dark text-white font-semibold px-8 py-3 rounded-full transition">
+                   class="inline-block bg-hopono-gold hover:bg-hopono-gold-light text-hopono-dark font-semibold px-8 py-3 rounded-full transition duration-300 transform hover:scale-105 shadow-lg shadow-hopono-gold/20">
                     Begin Your Journey
                 </a>
             </div>

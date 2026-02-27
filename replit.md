@@ -9,6 +9,9 @@ A Flask-based booking and management system for HoPono Massage, a massage therap
 - **ORM**: SQLAlchemy + Flask-Migrate (Alembic)
 - **Auth**: Flask-Login (admin panel)
 - **Frontend**: Jinja2 + Tailwind CSS (CDN) + Alpine.js
+- **Theme**: Dark luxury aesthetic (charcoal #0c1117 backgrounds, #161b22 surface cards, gold #dba11d accents, white text)
+- **Animations**: Scroll-triggered fade-up/fade-in via Intersection Observer (classes in base.html)
+- **Imagery**: Stock photography backgrounds on hero sections (hero_bg.jpg, about_massage.jpg, services_header.jpg, experience_atmosphere.jpg, contact_bg.jpg in app/static/images/)
 - **CSRF**: Flask-WTF CSRFProtect (form tokens + X-CSRFToken header for AJAX)
 
 ## Project Structure

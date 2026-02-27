@@ -2,52 +2,50 @@
 {% block title %}Booking Confirmed — HoPono Massage{% endblock %}
 
 {% block content %}
-<section class="py-20 bg-white">
+<section class="py-20 bg-hopono-dark">
     <div class="max-w-lg mx-auto px-4 text-center">
-        <!-- Success icon -->
-        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="w-20 h-20 bg-green-500/10 border border-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6 fade-up">
+            <svg class="w-10 h-10 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
         </div>
 
-        <h1 class="text-3xl font-heading font-semibold text-hopono-blue-deeper mb-2">Booking Confirmed!</h1>
-        <p class="text-gray-500 mb-8">Thank you for choosing HoPono Massage.</p>
+        <h1 class="text-3xl font-heading font-semibold text-white mb-2 fade-up stagger-1">Booking Confirmed!</h1>
+        <p class="text-white/40 mb-8 fade-up stagger-2">Thank you for choosing HoPono Massage.</p>
 
-        <!-- Booking Details -->
-        <div class="bg-hopono-cream rounded-2xl p-8 text-left">
-            <h2 class="font-heading font-semibold text-hopono-blue-deeper mb-4">Your Appointment</h2>
-            <div class="space-y-3 text-gray-700">
+        <div class="bg-hopono-surface border border-white/5 rounded-2xl p-8 text-left fade-up stagger-3">
+            <h2 class="font-heading font-semibold text-white mb-4">Your Appointment</h2>
+            <div class="space-y-3">
                 <div class="flex justify-between">
-                    <span class="text-gray-500">Service</span>
-                    <span class="font-medium">{{ booking.service.name }}</span>
+                    <span class="text-white/40">Service</span>
+                    <span class="font-medium text-white">{{ booking.service.name }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-500">Date</span>
-                    <span class="font-medium">{{ booking.date.strftime('%A, %B %d, %Y') }}</span>
+                    <span class="text-white/40">Date</span>
+                    <span class="font-medium text-white">{{ booking.date.strftime('%A, %B %d, %Y') }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-500">Time</span>
-                    <span class="font-medium">{{ booking.start_time.strftime('%H:%M') }} — {{ booking.end_time.strftime('%H:%M') }}</span>
+                    <span class="text-white/40">Time</span>
+                    <span class="font-medium text-white">{{ booking.start_time.strftime('%H:%M') }} — {{ booking.end_time.strftime('%H:%M') }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-500">Duration</span>
-                    <span class="font-medium">{{ booking.service.duration_minutes }} minutes</span>
+                    <span class="text-white/40">Duration</span>
+                    <span class="font-medium text-white">{{ booking.service.duration_minutes }} minutes</span>
                 </div>
-                <hr class="border-gray-200">
+                <hr class="border-white/5">
                 <div class="flex justify-between">
-                    <span class="text-gray-500">Price</span>
-                    <span class="font-semibold text-hopono-blue-deeper">
+                    <span class="text-white/40">Price</span>
+                    <span class="font-semibold text-hopono-gold">
                         &euro;{{ "%.2f"|format(booking.service.price_eur) }}
                         {% if booking.discount_amount %}
-                        <span class="text-green-600 text-sm">(-&euro;{{ "%.2f"|format(booking.discount_amount) }})</span>
+                        <span class="text-green-400 text-sm">(-&euro;{{ "%.2f"|format(booking.discount_amount) }})</span>
                         {% endif %}
                     </span>
                 </div>
             </div>
         </div>
 
-        <p class="text-gray-500 text-sm mt-6">
+        <p class="text-white/40 text-sm mt-6 fade-up">
             {% if booking.client.reminder_preference in ['phone', 'both'] %}
             You will receive an SMS reminder before your appointment.
             {% endif %}
@@ -56,13 +54,13 @@
             {% endif %}
         </p>
 
-        <p class="text-gray-400 text-sm mt-4">
+        <p class="text-white/30 text-sm mt-4 fade-up">
             Need to reschedule? Contact us at
-            <a href="tel:+35796537959" class="text-hopono-blue hover:underline">+357 96 537 959</a>
+            <a href="tel:+35796537959" class="text-hopono-gold hover:text-hopono-gold-light transition duration-300">+357 96 537 959</a>
         </p>
 
         <a href="{{ url_for('public.home') }}"
-           class="inline-block mt-8 bg-hopono-blue hover:bg-hopono-blue-dark text-white font-semibold px-8 py-3 rounded-full transition">
+           class="inline-block mt-8 bg-hopono-gold hover:bg-hopono-gold-light text-hopono-dark font-semibold px-8 py-3 rounded-full transition duration-300 transform hover:scale-105 shadow-lg shadow-hopono-gold/20 fade-up">
             Return Home
         </a>
     </div>

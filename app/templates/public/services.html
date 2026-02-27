@@ -2,39 +2,42 @@
 {% block title %}Services — HoPono Massage Studio{% endblock %}
 
 {% block content %}
-<!-- Hero -->
-<section class="bg-gradient-to-br from-hopono-blue-deeper to-hopono-blue py-20">
-    <div class="max-w-4xl mx-auto px-4 text-center">
-        <h1 class="text-4xl sm:text-5xl font-heading font-light text-white mb-4">Our Services</h1>
-        <p class="text-white/70 text-lg">Treatments tailored to your needs</p>
+<section class="relative py-24 sm:py-32 overflow-hidden">
+    <div class="absolute inset-0">
+        <img src="{{ url_for('static', filename='images/services_header.jpg') }}" alt="" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-hopono-dark/85"></div>
+    </div>
+    <div class="relative max-w-4xl mx-auto px-4 text-center">
+        <h1 class="text-4xl sm:text-5xl font-heading font-light text-white mb-4 fade-up">Our Services</h1>
+        <p class="text-white/50 text-lg fade-up stagger-1">Treatments tailored to your needs</p>
     </div>
 </section>
 
-<section class="py-20 bg-white">
+<section class="py-20 bg-hopono-dark">
     <div class="max-w-5xl mx-auto px-4">
-        <div class="space-y-8">
+        <div class="space-y-6">
             {% for service in services %}
-            <div class="bg-hopono-cream rounded-2xl p-8 sm:p-10 hover:shadow-lg transition duration-300 border border-transparent hover:border-hopono-gold/20">
+            <div class="bg-hopono-surface border border-white/5 rounded-2xl p-8 sm:p-10 hover:border-hopono-gold/20 transition duration-300 hover:shadow-lg hover:shadow-hopono-gold/5 fade-up">
                 <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div class="flex-1">
-                        <h2 class="text-2xl font-heading font-semibold text-hopono-blue-deeper mb-1">
+                        <h2 class="text-2xl font-heading font-semibold text-white mb-1">
                             {{ service.name }}
                         </h2>
                         <p class="text-hopono-gold font-medium mb-4">{{ service.subtitle }}</p>
-                        <p class="text-gray-600 leading-relaxed">{{ service.description }}</p>
+                        <p class="text-white/50 leading-relaxed">{{ service.description }}</p>
                         {% if service.is_couples %}
-                        <p class="text-sm text-hopono-blue mt-3 font-medium">
+                        <p class="text-sm text-hopono-gold/70 mt-3 font-medium">
                             Price is per person. Choose any massage style for each participant.
                         </p>
                         {% endif %}
                     </div>
                     <div class="sm:text-right sm:ml-8 flex-shrink-0">
-                        <div class="text-3xl font-heading font-bold text-hopono-blue-deeper">
+                        <div class="text-3xl font-heading font-bold text-white">
                             &euro;{{ "%.0f"|format(service.price_eur) }}
                         </div>
-                        <div class="text-gray-400 text-sm">{{ service.duration_minutes }} minutes</div>
+                        <div class="text-white/30 text-sm">{{ service.duration_minutes }} minutes</div>
                         <a href="{{ url_for('booking.select_service') }}"
-                           class="inline-block mt-4 bg-hopono-gold hover:bg-hopono-gold-light text-hopono-blue-deeper font-semibold px-6 py-2 rounded-full text-sm transition">
+                           class="inline-block mt-4 bg-hopono-gold hover:bg-hopono-gold-light text-hopono-dark font-semibold px-6 py-2 rounded-full text-sm transition duration-300 transform hover:scale-105">
                             Book This
                         </a>
                     </div>
@@ -43,13 +46,13 @@
             {% endfor %}
         </div>
 
-        <div class="mt-16 bg-gradient-to-r from-hopono-blue to-hopono-blue-dark rounded-2xl p-10 text-center">
+        <div class="mt-16 bg-hopono-surface border border-white/5 rounded-2xl p-10 text-center fade-up">
             <h3 class="text-2xl font-heading font-semibold text-white mb-3">Not sure which treatment to choose?</h3>
-            <p class="text-white/70 mb-6">
+            <p class="text-white/40 mb-6">
                 Contact us and we'll help you find the perfect massage for your needs.
             </p>
             <a href="{{ url_for('public.contact') }}"
-               class="inline-block bg-white hover:bg-hopono-cream text-hopono-blue-deeper font-semibold px-8 py-3 rounded-full transition">
+               class="inline-block bg-white/5 border border-white/10 hover:bg-hopono-gold hover:text-hopono-dark hover:border-hopono-gold text-white font-semibold px-8 py-3 rounded-full transition duration-300">
                 Get in Touch
             </a>
         </div>
