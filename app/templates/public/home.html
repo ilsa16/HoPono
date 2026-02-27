@@ -4,21 +4,43 @@
 {% block content %}
 <div x-data="homeBooking()">
 
-    <!-- Hero Section — compact -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!--  1. HERO                                               -->
+    <!-- ═══════════════════════════════════════════════════════ -->
     <section class="relative bg-hopono-blue-deeper overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-br from-hopono-blue-deeper via-hopono-blue-dark to-hopono-blue opacity-90"></div>
-        <div class="relative max-w-7xl mx-auto px-4 py-14 sm:py-20">
-            <div class="text-center max-w-3xl mx-auto">
-                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-heading font-light text-white leading-tight mb-3">
-                    Massage is a <span class="text-hopono-gold font-medium">Journey</span>
-                </h1>
-                <p class="text-lg sm:text-xl text-white/70 font-light mb-6">
-                    Professional massage therapy in the heart of Nicosia.
-                </p>
-                <a href="#book" @click.prevent="scrollToBooking()"
-                   class="inline-block bg-hopono-gold hover:bg-hopono-gold-light text-hopono-blue-deeper font-semibold px-8 py-3 rounded-full text-lg transition transform hover:scale-105">
-                    Book Your Session
-                </a>
+        <div class="relative max-w-7xl mx-auto px-4 py-20 sm:py-28 lg:py-32">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="text-center lg:text-left">
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-heading font-light text-white leading-tight mb-5">
+                        Reset Your Body.<br>
+                        <span class="text-hopono-gold font-medium">Quiet Your Mind.</span>
+                    </h1>
+                    <p class="text-lg sm:text-xl text-white/60 font-light mb-8 max-w-lg mx-auto lg:mx-0 leading-relaxed">
+                        Release the tension you've been carrying. Professional massage therapy
+                        in the heart of Nicosia, tailored to restore your balance.
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
+                        <a href="#book" @click.prevent="scrollToBooking()"
+                           class="inline-block bg-hopono-gold hover:bg-hopono-gold-light text-hopono-blue-deeper font-semibold px-10 py-3.5 rounded-full text-lg transition transform hover:scale-105">
+                            Book Your Session
+                        </a>
+                        <a href="#treatments"
+                           class="text-white/70 hover:text-hopono-gold font-medium transition text-sm">
+                            View Treatments &darr;
+                        </a>
+                    </div>
+                </div>
+                <div class="hidden lg:block">
+                    <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-10 text-center">
+                        <div class="text-hopono-gold text-5xl mb-4">&ldquo;</div>
+                        <blockquote class="text-white/90 text-xl italic font-light leading-relaxed mb-4">
+                            It is my pleasure to be a part of your journey towards wellness.
+                        </blockquote>
+                        <p class="text-hopono-gold font-heading font-medium">&mdash; Evthoras</p>
+                        <p class="text-white/40 text-sm mt-1">Founder & Therapist</p>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="absolute bottom-0 left-0 right-0">
@@ -28,8 +50,10 @@
         </div>
     </section>
 
-    <!-- Inline Booking Section -->
-    <section id="book" class="py-12 sm:py-16 bg-white">
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!--  2. BOOKING FLOW (stays at the top, unchanged logic)   -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <section id="book" class="py-14 sm:py-20 bg-white">
         <div class="max-w-5xl mx-auto px-4">
 
             <noscript>
@@ -41,7 +65,6 @@
                 </div>
             </noscript>
 
-            <!-- Progress indicator -->
             <div class="flex items-center justify-center mb-10">
                 <div class="flex items-center space-x-3 text-sm">
                     <span class="flex items-center" :class="step >= 1 ? 'text-hopono-blue font-semibold' : 'text-gray-400'">
@@ -128,7 +151,6 @@
                     Pick a Date & Time
                 </h2>
 
-                <!-- Calendar -->
                 <div class="max-w-md mx-auto mb-6">
                     <div class="bg-hopono-cream rounded-2xl p-5">
                         <div class="flex items-center justify-between mb-4">
@@ -162,13 +184,11 @@
                     </div>
                 </div>
 
-                <!-- Loading state -->
                 <div x-show="loadingSlots" class="text-center mt-6">
                     <div class="inline-block animate-spin rounded-full h-7 w-7 border-b-2 border-hopono-blue"></div>
                     <p class="text-gray-500 mt-2 text-sm">Loading available times...</p>
                 </div>
 
-                <!-- Slots grid -->
                 <div x-show="selectedDate && !loadingSlots && slots.length > 0" class="mt-6">
                     <p class="text-center text-gray-500 text-sm mb-3">Available times for <span x-text="formattedDate" class="font-semibold text-hopono-blue-deeper"></span></p>
                     <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 max-w-2xl mx-auto">
@@ -182,7 +202,6 @@
                     </div>
                 </div>
 
-                <!-- No slots -->
                 <div x-show="selectedDate && !loadingSlots && slots.length === 0" class="text-center mt-6">
                     <p class="text-gray-400 text-sm">No available times for this date. Please choose another day.</p>
                 </div>
@@ -204,7 +223,6 @@
                         </button>
                     </div>
 
-                    <!-- Summary -->
                     <div class="bg-hopono-cream rounded-xl p-5 mb-8">
                         <h3 class="font-heading font-semibold text-hopono-blue-deeper text-sm mb-3">Your Booking</h3>
                         <div class="text-sm text-gray-600 space-y-1.5">
@@ -270,7 +288,6 @@
                             </select>
                         </div>
 
-                        <!-- Coupon -->
                         <div x-data="{ showCoupon: false }">
                             <button type="button" @click="showCoupon = !showCoupon"
                                     class="text-xs text-gray-400 hover:text-hopono-blue transition">
@@ -288,7 +305,6 @@
                                :class="couponValid ? 'text-green-600' : 'text-red-500'"></p>
                         </div>
 
-                        <!-- GDPR -->
                         <div class="pt-3 border-t border-gray-200">
                             <label class="flex items-start space-x-3">
                                 <input type="checkbox" required
@@ -310,36 +326,245 @@
         </div>
     </section>
 
-    <!-- About Preview — kept for the studio feel -->
-    <section class="py-16 bg-hopono-cream">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <h2 class="text-2xl sm:text-3xl font-heading font-semibold text-hopono-blue-deeper mb-5">
-                        Your Wellness, Our Passion
-                    </h2>
-                    <p class="text-gray-600 leading-relaxed mb-4">
-                        At HoPono, we believe that massage is more than just a treatment &mdash; it's an
-                        experience that nurtures body, mind, and spirit.
-                    </p>
-                    <p class="text-gray-600 leading-relaxed mb-5 text-sm">
-                        Our therapist Evthoras brings years of experience and a deep understanding of
-                        various massage traditions, from Indian Ayurveda to Thai and Chinese techniques.
-                    </p>
-                    <a href="{{ url_for('public.about') }}"
-                       class="inline-block text-hopono-blue hover:text-hopono-blue-dark font-semibold transition text-sm">
-                        Learn more about us &rarr;
-                    </a>
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!--  3. SOCIAL PROOF                                       -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <section class="py-16 sm:py-20 bg-hopono-cream">
+        <div class="max-w-5xl mx-auto px-4">
+            <div class="text-center mb-10">
+                <div class="flex items-center justify-center space-x-1 mb-2">
+                    {% for _ in range(5) %}
+                    <svg class="w-5 h-5 text-hopono-gold" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    {% endfor %}
+                    <span class="text-hopono-blue-deeper font-bold text-lg ml-2">4.9</span>
                 </div>
-                <div class="bg-gradient-to-br from-hopono-blue to-hopono-blue-dark rounded-2xl p-10 text-center">
-                    <blockquote class="text-white text-lg italic font-light leading-relaxed">
-                        &ldquo;It is my pleasure to be a part of your journey towards wellness.&rdquo;
-                    </blockquote>
-                    <p class="text-hopono-gold mt-3 font-heading font-medium">&mdash; Evthoras</p>
+                <p class="text-gray-500 text-sm">Trusted by clients in Nicosia</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <p class="text-gray-700 italic leading-relaxed mb-4">
+                        &ldquo;I walked in stressed and exhausted. I walked out feeling like a completely different person. Truly restorative.&rdquo;
+                    </p>
+                    <p class="text-hopono-blue-deeper font-semibold text-sm">&mdash; Maria K.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <p class="text-gray-700 italic leading-relaxed mb-4">
+                        &ldquo;The best massage I've had in Cyprus. Evthoras really listens to what your body needs. I keep coming back.&rdquo;
+                    </p>
+                    <p class="text-hopono-blue-deeper font-semibold text-sm">&mdash; Andreas P.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <p class="text-gray-700 italic leading-relaxed mb-4">
+                        &ldquo;I didn't know how much tension I was holding until it was gone. The deep tissue session was exactly what I needed.&rdquo;
+                    </p>
+                    <p class="text-hopono-blue-deeper font-semibold text-sm">&mdash; Elena S.</p>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!--  4. TREATMENTS OVERVIEW                                -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <section id="treatments" class="py-16 sm:py-20 bg-white">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl sm:text-4xl font-heading font-semibold text-hopono-blue-deeper mb-3">
+                    Our Treatments
+                </h2>
+                <p class="text-gray-500 max-w-xl mx-auto">
+                    From deep recovery to pure relaxation &mdash; find the session that fits you.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {% for service in services[:4] %}
+                <div class="bg-hopono-cream rounded-2xl p-6 flex flex-col justify-between border border-transparent hover:border-hopono-gold/30 transition duration-200 hover:shadow-md">
+                    <div>
+                        <h3 class="font-heading font-semibold text-hopono-blue-deeper text-lg mb-1">{{ service.name }}</h3>
+                        <p class="text-hopono-gold text-sm font-medium mb-3">{{ service.subtitle }}</p>
+                        <p class="text-gray-500 text-sm leading-relaxed mb-4">{{ service.description[:80] }}{% if service.description|length > 80 %}...{% endif %}</p>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between text-sm mb-4">
+                            <span class="text-hopono-blue font-bold text-lg">&euro;{{ "%.0f"|format(service.price_eur) }}</span>
+                            <span class="text-gray-400">{{ service.duration_minutes }} min</span>
+                        </div>
+                        <a href="#book" @click.prevent="scrollToBooking()"
+                           class="block text-center bg-hopono-blue-deeper hover:bg-hopono-blue-dark text-white font-medium py-2.5 rounded-full text-sm transition">
+                            Book Now
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="text-center mt-8">
+                <a href="{{ url_for('public.services') }}"
+                   class="text-hopono-blue hover:text-hopono-blue-dark font-semibold transition text-sm">
+                    View Full Treatment Menu &rarr;
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!--  5. WHY CHOOSE US                                      -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <section class="py-16 sm:py-20 bg-hopono-cream">
+        <div class="max-w-5xl mx-auto px-4">
+            <h2 class="text-3xl sm:text-4xl font-heading font-semibold text-hopono-blue-deeper mb-12 text-center">
+                Why Clients Choose HoPono
+            </h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-12 h-12 bg-hopono-blue-deeper/10 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-hopono-blue-deeper" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-heading font-semibold text-hopono-blue-deeper mb-1">Certified & Experienced</h3>
+                        <p class="text-gray-500 text-sm leading-relaxed">Trained across Indian Ayurveda, Thai, and Chinese massage traditions with years of hands-on experience.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-12 h-12 bg-hopono-blue-deeper/10 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-hopono-blue-deeper" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-heading font-semibold text-hopono-blue-deeper mb-1">Private & Relaxing</h3>
+                        <p class="text-gray-500 text-sm leading-relaxed">A calm, private environment designed so you can fully unwind without distraction.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-12 h-12 bg-hopono-blue-deeper/10 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-hopono-blue-deeper" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-heading font-semibold text-hopono-blue-deeper mb-1">Tailored to You</h3>
+                        <p class="text-gray-500 text-sm leading-relaxed">Every session is adjusted to your pressure preference, focus areas, and how your body feels that day.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-12 h-12 bg-hopono-blue-deeper/10 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-hopono-blue-deeper" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-heading font-semibold text-hopono-blue-deeper mb-1">Easy Online Booking</h3>
+                        <p class="text-gray-500 text-sm leading-relaxed">Choose your treatment, pick a time that works, and you're booked. No phone calls, no waiting.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!--  6. THE EXPERIENCE                                     -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <section class="relative py-16 sm:py-20 bg-hopono-blue-deeper overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-hopono-blue-deeper via-hopono-blue-dark to-hopono-blue opacity-80"></div>
+        <div class="relative max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-3xl sm:text-4xl font-heading font-light text-white mb-8">
+                The <span class="text-hopono-gold font-medium">Experience</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-white/80 text-sm leading-relaxed">
+                <div>
+                    <div class="w-14 h-14 mx-auto mb-4 bg-white/10 rounded-2xl flex items-center justify-center">
+                        <svg class="w-7 h-7 text-hopono-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-heading font-semibold text-base mb-2">You Arrive</h3>
+                    <p>Step into a warm, quiet space. Soft lighting, calming scents. The world outside fades away.</p>
+                </div>
+                <div>
+                    <div class="w-14 h-14 mx-auto mb-4 bg-white/10 rounded-2xl flex items-center justify-center">
+                        <svg class="w-7 h-7 text-hopono-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-heading font-semibold text-base mb-2">You Release</h3>
+                    <p>Skilled hands find exactly where you hold your stress. Layer by layer, the tension melts away.</p>
+                </div>
+                <div>
+                    <div class="w-14 h-14 mx-auto mb-4 bg-white/10 rounded-2xl flex items-center justify-center">
+                        <svg class="w-7 h-7 text-hopono-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-heading font-semibold text-base mb-2">You Leave Renewed</h3>
+                    <p>A lighter body, a quieter mind. You leave feeling reset &mdash; ready for whatever comes next.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!--  7. HOW IT WORKS                                       -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <section class="py-16 sm:py-20 bg-white">
+        <div class="max-w-4xl mx-auto px-4">
+            <h2 class="text-3xl sm:text-4xl font-heading font-semibold text-hopono-blue-deeper mb-12 text-center">
+                How It Works
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div>
+                    <div class="w-16 h-16 mx-auto mb-4 bg-hopono-gold/15 rounded-full flex items-center justify-center">
+                        <span class="text-hopono-gold font-heading font-bold text-2xl">1</span>
+                    </div>
+                    <h3 class="font-heading font-semibold text-hopono-blue-deeper mb-2">Choose Your Treatment</h3>
+                    <p class="text-gray-500 text-sm">Browse our treatments and pick the one that speaks to you.</p>
+                </div>
+                <div>
+                    <div class="w-16 h-16 mx-auto mb-4 bg-hopono-gold/15 rounded-full flex items-center justify-center">
+                        <span class="text-hopono-gold font-heading font-bold text-2xl">2</span>
+                    </div>
+                    <h3 class="font-heading font-semibold text-hopono-blue-deeper mb-2">Pick a Date & Time</h3>
+                    <p class="text-gray-500 text-sm">See real-time availability and book the slot that fits your schedule.</p>
+                </div>
+                <div>
+                    <div class="w-16 h-16 mx-auto mb-4 bg-hopono-gold/15 rounded-full flex items-center justify-center">
+                        <span class="text-hopono-gold font-heading font-bold text-2xl">3</span>
+                    </div>
+                    <h3 class="font-heading font-semibold text-hopono-blue-deeper mb-2">Relax & Enjoy</h3>
+                    <p class="text-gray-500 text-sm">Show up, lie down, and let us take care of the rest.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!--  8. FINAL CTA                                          -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <section class="relative py-20 sm:py-28 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-hopono-blue-deeper via-hopono-blue-dark to-hopono-blue"></div>
+        <div class="relative text-center px-4">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-heading font-light text-white mb-5">
+                Your Body <span class="text-hopono-gold font-medium">Deserves This.</span>
+            </h2>
+            <p class="text-white/50 text-lg mb-8 max-w-md mx-auto">
+                Take the first step towards feeling like yourself again.
+            </p>
+            <a href="#book" @click.prevent="scrollToBooking()"
+               class="inline-block bg-hopono-gold hover:bg-hopono-gold-light text-hopono-blue-deeper font-semibold px-12 py-4 rounded-full text-lg transition transform hover:scale-105">
+                Book Your Session
+            </a>
+        </div>
+    </section>
+
 </div>
 {% endblock %}
 

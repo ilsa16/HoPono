@@ -209,13 +209,13 @@ def api_copy_month():
     if not data:
         return jsonify({"error": "No data provided"}), 400
 
-    source_year = data.get("source_year")
-    source_month = data.get("source_month")
-    target_year = data.get("target_year")
-    target_month = data.get("target_month")
-
-    if not all([source_year, source_month, target_year, target_month]):
-        return jsonify({"error": "source_year, source_month, target_year, target_month required"}), 400
+    try:
+        source_year = int(data.get("source_year"))
+        source_month = int(data.get("source_month"))
+        target_year = int(data.get("target_year"))
+        target_month = int(data.get("target_month"))
+    except (TypeError, ValueError):
+        return jsonify({"error": "source_year, source_month, target_year, target_month required as integers"}), 400
 
     source_start = date(source_year, source_month, 1)
     source_end = date(source_year, source_month, calendar.monthrange(source_year, source_month)[1])
