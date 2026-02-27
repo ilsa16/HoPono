@@ -211,6 +211,8 @@
                 <input type="hidden" name="service_id" :value="selectedServiceId">
                 <input type="hidden" name="date" :value="selectedDate">
                 <input type="hidden" name="start_time" :value="selectedTime">
+                <input type="hidden" name="_ts" x-init="$el.value = Math.floor(Date.now()/1000)" :value="$el.value">
+                <div style="position:absolute;left:-9999px;" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
 
                 <div>
                     <label class="block text-sm font-medium text-white/60 mb-1">Full Name *</label>

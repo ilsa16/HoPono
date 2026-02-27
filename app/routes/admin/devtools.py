@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session
 from flask_login import login_required
 from werkzeug.security import check_password_hash, generate_password_hash
+from app.extensions import limiter
 
 admin_devtools_bp = Blueprint("admin_devtools", __name__)
 
@@ -22,6 +23,7 @@ def devtools_required(f):
 
 @admin_devtools_bp.route("/login", methods=["GET", "POST"])
 @login_required
+@limiter.limit("5 per minute", methods=["POST"])
 def devtools_login():
     if session.get("devtools_unlocked"):
         return redirect(url_for("admin_devtools.devtools_page"))

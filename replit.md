@@ -18,6 +18,10 @@ A Flask-based booking and management system for HoPono Massage, a massage therap
   - Alpine.js state: `focusMode`, `focusedServiceId`, `allServices[]` array populated from Jinja `{{ services }}`, computed `focusedService` getter, `enterFocusMode()`, `switchFocusedService()`, `confirmFocusSelection()` methods
   - Service model fields: `image_filename`, `best_for`, `pressure_level` (added via migration)
 - **CSRF**: Flask-WTF CSRFProtect (form tokens + X-CSRFToken header for AJAX)
+- **Rate Limiting**: Flask-Limiter (in-memory, 60/min global; 5/min login; 5/min+30/hr booking; 10/min coupon validation)
+- **Brute Force Protection**: IP-based lockout after 5 failed admin login attempts within 15 minutes
+- **Bot Protection**: Honeypot field + timing-based detection (< 3s = bot) on booking forms
+- **Developer Tools**: Separate password gate behind admin auth (double authentication layer)
 
 ## Project Structure
 ```

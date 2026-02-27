@@ -1,7 +1,8 @@
 import os
-from flask import Flask
+from flask import Flask, render_template
+from werkzeug.middleware.proxy_fix import ProxyFix
 from .config import config
-from .extensions import db, migrate, login_manager, csrf
+from .extensions import db, migrate, login_manager, csrf, limiter
 
 
 def create_app(config_name=None):
@@ -10,12 +11,18 @@ def create_app(config_name=None):
 
     app = Flask(__name__)
     app.config.from_object(config[config_name])
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
     # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
     csrf.init_app(app)
+    limiter.init_app(app)
+
+    @app.errorhandler(429)
+    def ratelimit_handler(e):
+        return render_template("errors/429.html"), 429
 
     # Register blueprints
     from .routes.public import public_bp

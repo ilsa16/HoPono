@@ -1,5 +1,7 @@
+import time
+import logging
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, Response
-from app.extensions import db
+from app.extensions import db, limiter
 from app.models.service import Service
 from app.models.booking import Booking
 from app.models.client import Client
@@ -8,6 +10,8 @@ from app.services.slot_engine import get_available_slots
 from app.services.booking_service import create_booking
 from app.services.coupon_service import validate_coupon
 from app.services.calendar_service import generate_ics, google_calendar_url, outlook_calendar_url
+
+logger = logging.getLogger(__name__)
 
 booking_bp = Blueprint("booking", __name__)
 
@@ -30,7 +34,26 @@ def slots():
 
 
 @booking_bp.route("/confirm", methods=["POST"])
+@limiter.limit("5 per minute;30 per hour")
 def confirm():
+    honeypot = request.form.get("website", "")
+    if honeypot:
+        logger.warning("Honeypot triggered from IP %s", request.remote_addr)
+        return redirect(url_for("booking.select_service"))
+
+    form_loaded_at = request.form.get("_ts", "")
+    if not form_loaded_at:
+        logger.warning("Missing timestamp from IP %s", request.remote_addr)
+        return redirect(url_for("booking.select_service"))
+    try:
+        elapsed = time.time() - float(form_loaded_at)
+        if elapsed < 3 or elapsed > 7200:
+            logger.warning("Bot timing check failed from IP %s (%.1fs)", request.remote_addr, elapsed)
+            return redirect(url_for("booking.select_service"))
+    except (ValueError, TypeError):
+        logger.warning("Invalid timestamp from IP %s", request.remote_addr)
+        return redirect(url_for("booking.select_service"))
+
     try:
         booking = create_booking(
             service_id=request.form.get("service_id", type=int),
@@ -68,6 +91,7 @@ def download_ics(booking_id):
 
 
 @booking_bp.route("/validate-coupon", methods=["POST"])
+@limiter.limit("10 per minute")
 def validate_coupon_route():
     code = request.json.get("code", "")
     service_id = request.json.get("service_id")
