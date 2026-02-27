@@ -61,7 +61,7 @@ def confirm():
             start_time=request.form.get("start_time"),
             client_name=request.form.get("name"),
             client_email=request.form.get("email"),
-            client_phone=request.form.get("phone"),
+            client_phone=request.form.get("country_code", "+357") + request.form.get("phone", ""),
             reminder_preference=request.form.get("reminder_preference", "email"),
             coupon_code=request.form.get("coupon_code"),
         )
