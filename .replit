@@ -11,6 +11,7 @@ FLASK_ENV = "development"
 
 [deployment]
 run = ["sh", "-c", "pip install -r requirements.txt && gunicorn --bind 0.0.0.0:5000 --workers 2 'app:create_app()'"]
+deploymentTarget = "cloudrun"
 
 [agent]
 expertMode = true
