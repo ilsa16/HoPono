@@ -36,10 +36,21 @@ def dashboard():
         ).count()
     )
 
+    pending_bookings = (
+        Booking.query.filter(
+            Booking.date > today,
+            Booking.status == "confirmed",
+        )
+        .order_by(Booking.date, Booking.start_time)
+        .limit(10)
+        .all()
+    )
+
     return render_template(
         "admin/dashboard.html",
         todays_bookings=todays_bookings,
         weekly_count=weekly_count,
         total_clients=total_clients,
         upcoming_count=upcoming_count,
+        pending_bookings=pending_bookings,
     )

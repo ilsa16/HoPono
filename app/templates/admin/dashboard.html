@@ -62,4 +62,40 @@
     </div>
     {% endif %}
 </div>
+
+<div class="bg-white rounded-xl border border-gray-200 mt-6">
+    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-800">Pending Bookings</h2>
+        <a href="{{ url_for('admin_bookings.list_bookings') }}"
+           class="text-sm text-hopono-blue hover:text-hopono-blue-dark font-medium transition">
+            View All &rarr;
+        </a>
+    </div>
+    {% if pending_bookings %}
+    <div class="divide-y divide-gray-100">
+        {% for booking in pending_bookings %}
+        <a href="{{ url_for('admin_bookings.booking_detail', booking_id=booking.id) }}"
+           class="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition">
+            <div class="flex items-center space-x-4">
+                <div class="text-center bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 min-w-[80px]">
+                    <div class="text-xs font-medium text-amber-700">{{ booking.date.strftime('%b %d') }}</div>
+                    <div class="text-lg font-bold text-amber-800">{{ booking.start_time.strftime('%H:%M') }}</div>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-800">{{ booking.client.name }}</p>
+                    <p class="text-sm text-gray-500">{{ booking.service.name }} &middot; {{ booking.service.duration_minutes }}min</p>
+                </div>
+            </div>
+            <span class="text-xs font-medium px-2.5 py-1 rounded-full bg-blue-100 text-blue-700">
+                Confirmed
+            </span>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="p-8 text-center text-gray-400">
+        No pending bookings.
+    </div>
+    {% endif %}
+</div>
 {% endblock %}
