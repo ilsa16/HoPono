@@ -470,7 +470,9 @@ function bookingApp() {
         scrollToCard(idx, container) {
             if (!container) return;
             const cards = container.querySelectorAll(':scope > .snap-center');
-            if (cards[idx]) cards[idx].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            if (!cards[idx]) return;
+            const gap = 16;
+            container.scrollTo({ left: idx * (cards[0].offsetWidth + gap), behavior: 'smooth' });
         },
 
         scrollCarousel(dir, container) {
