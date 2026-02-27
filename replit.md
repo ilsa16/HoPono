@@ -11,7 +11,12 @@ A Flask-based booking and management system for HoPono Massage, a massage therap
 - **Frontend**: Jinja2 + Tailwind CSS (CDN) + Alpine.js
 - **Theme**: Dark luxury aesthetic (charcoal #0c1117 backgrounds, #161b22 surface cards, gold #dba11d accents, white text)
 - **Animations**: Scroll-triggered fade-up/fade-in via Intersection Observer (classes in base.html)
-- **Imagery**: Stock photography backgrounds on hero sections (hero_bg.jpg, about_massage.jpg, services_header.jpg, experience_atmosphere.jpg, contact_bg.jpg in app/static/images/)
+- **Imagery**: Stock photography backgrounds on hero sections (hero_bg.jpg, about_massage.jpg, services_header.jpg, experience_atmosphere.jpg, contact_bg.jpg in app/static/images/); AI-generated per-service portrait images in app/static/images/services/
+- **Treatment Selector**: Two-state product configurator on homepage and /book page:
+  - State A (Grid Browse): 2x3 card grid; clicking a card enters State B
+  - State B (Focus Mode): 3-column layout — portrait image (left), service details/description/metadata/CTA (center), compact service rail (right). Service rail allows switching the focused service with crossfade. "All treatments" back-link returns to State A. On mobile, columns stack vertically.
+  - Alpine.js state: `focusMode`, `focusedServiceId`, `allServices[]` array populated from Jinja `{{ services }}`, computed `focusedService` getter, `enterFocusMode()`, `switchFocusedService()`, `confirmFocusSelection()` methods
+  - Service model fields: `image_filename`, `best_for`, `pressure_level` (added via migration)
 - **CSRF**: Flask-WTF CSRFProtect (form tokens + X-CSRFToken header for AJAX)
 
 ## Project Structure

@@ -13,5 +13,8 @@ class Service(db.Model):
     is_couples = db.Column(db.Boolean, default=False)
     is_active = db.Column(db.Boolean, default=True)
     sort_order = db.Column(db.Integer, default=0)
+    image_filename = db.Column(db.String(120))
+    best_for = db.Column(db.String(200))
+    pressure_level = db.Column(db.String(100))
 
     bookings = db.relationship("Booking", backref="service", lazy="dynamic")

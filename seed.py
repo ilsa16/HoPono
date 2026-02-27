@@ -35,15 +35,18 @@ def seed():
                 "name": "Bali Blossom",
                 "subtitle": "Relaxing Massage",
                 "description": (
-                    "A soft and gentle treatment that blends the wisdom of Indian "
-                    "Ayurveda with the precision of Chinese acupressure techniques. "
-                    "This massage soothes the body and calms the mind, releasing "
-                    "tension through flowing, rhythmic strokes."
+                    "A gentle, full-body treatment designed to quiet the nervous system. "
+                    "Blending the wisdom of Indian Ayurveda with the precision of Chinese "
+                    "acupressure techniques, this massage soothes the body and calms the mind, "
+                    "releasing tension through flowing, rhythmic strokes."
                 ),
                 "duration_minutes": 60,
                 "price_eur": 50.00,
                 "is_couples": False,
                 "sort_order": 1,
+                "image_filename": "bali-blossom.png",
+                "best_for": "Stress & fatigue",
+                "pressure_level": "Light to medium",
             },
             {
                 "name": "The Dive",
@@ -57,6 +60,9 @@ def seed():
                 "price_eur": 50.00,
                 "is_couples": False,
                 "sort_order": 2,
+                "image_filename": "the-dive.png",
+                "best_for": "Muscle knots & chronic pain",
+                "pressure_level": "Firm to deep",
             },
             {
                 "name": "Buddha's Touch",
@@ -71,6 +77,9 @@ def seed():
                 "price_eur": 50.00,
                 "is_couples": False,
                 "sort_order": 3,
+                "image_filename": "buddhas-touch.png",
+                "best_for": "Flexibility & energy flow",
+                "pressure_level": "Medium to firm",
             },
             {
                 "name": "The Cure",
@@ -84,6 +93,9 @@ def seed():
                 "price_eur": 50.00,
                 "is_couples": False,
                 "sort_order": 4,
+                "image_filename": "the-cure.png",
+                "best_for": "Back, neck & leg tension",
+                "pressure_level": "Medium to deep",
             },
             {
                 "name": "Old School",
@@ -98,6 +110,9 @@ def seed():
                 "price_eur": 30.00,
                 "is_couples": False,
                 "sort_order": 5,
+                "image_filename": "old-school.png",
+                "best_for": "Circulation & recovery",
+                "pressure_level": "Suction-based",
             },
             {
                 "name": "Couples' Massage",
@@ -111,16 +126,23 @@ def seed():
                 "price_eur": 50.00,
                 "is_couples": True,
                 "sort_order": 6,
+                "image_filename": "couples-massage.png",
+                "best_for": "Shared relaxation",
+                "pressure_level": "Your choice",
             },
         ]
 
         for s in services:
-            if not Service.query.filter_by(name=s["name"]).first():
+            existing = Service.query.filter_by(name=s["name"]).first()
+            if not existing:
                 service = Service(**s)
                 db.session.add(service)
                 print(f"Service '{s['name']}' created.")
             else:
-                print(f"Service '{s['name']}' already exists.")
+                for key, value in s.items():
+                    if key != "name":
+                        setattr(existing, key, value)
+                print(f"Service '{s['name']}' updated.")
 
         # Create default settings
         defaults = {
