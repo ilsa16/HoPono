@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, Response
 from app.extensions import db
 from app.models.service import Service
 from app.models.booking import Booking
@@ -7,6 +7,7 @@ from app.models.coupon import Coupon
 from app.services.slot_engine import get_available_slots
 from app.services.booking_service import create_booking
 from app.services.coupon_service import validate_coupon
+from app.services.calendar_service import generate_ics, google_calendar_url, outlook_calendar_url
 
 booking_bp = Blueprint("booking", __name__)
 
@@ -50,7 +51,20 @@ def confirm():
 @booking_bp.route("/success/<int:booking_id>")
 def success(booking_id):
     booking = Booking.query.get_or_404(booking_id)
-    return render_template("booking/confirmation.html", booking=booking)
+    gcal_url = google_calendar_url(booking)
+    outlook_url = outlook_calendar_url(booking)
+    return render_template("booking/confirmation.html", booking=booking, gcal_url=gcal_url, outlook_url=outlook_url)
+
+
+@booking_bp.route("/calendar/<int:booking_id>.ics")
+def download_ics(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    ics_content = generate_ics(booking)
+    return Response(
+        ics_content,
+        mimetype="text/calendar",
+        headers={"Content-Disposition": f"attachment; filename=hopono-booking-{booking_id}.ics"}
+    )
 
 
 @booking_bp.route("/validate-coupon", methods=["POST"])

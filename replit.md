@@ -50,11 +50,13 @@ app/
       payments.py       # Payment tracking
       coupons.py        # Coupon management
       settings.py       # App settings
+      messaging.py      # Test SMS/Email sending page
   services/
     booking_service.py  # Booking creation logic
     slot_engine.py      # Available slot calculation
     coupon_service.py   # Coupon validation
     reminder_service.py # SMS/Email reminder sending
+    calendar_service.py # ICS file generation + Google/Outlook calendar URLs
   tasks/
     scheduler.py        # APScheduler setup
     send_reminders.py   # Reminder job
@@ -68,6 +70,8 @@ migrations/             # Alembic migration files
 - `/services` — Service listing
 - `/book` — Standalone booking flow (fallback)
 - `/book/slots?service_id=X&date=YYYY-MM-DD` — Available slots API
+- `/book/calendar/<booking_id>.ics` — Download ICS calendar file for a booking
+- `/book/success/<booking_id>` — Booking confirmation with Add to Calendar buttons
 
 ### Admin
 - `/admin/login` — Admin login
@@ -80,6 +84,7 @@ migrations/             # Alembic migration files
 - `/admin/availability/api/copy-week` — Copy week's availability (POST JSON)
 - `/admin/availability/api/month?year=YYYY&month=M` — Month availability JSON (count + windows per day)
 - `/admin/availability/api/copy-month` — Copy entire month's availability (POST JSON)
+- `/admin/messaging` — Test SMS and email sending page
 
 ## Environment Variables
 - `DATABASE_URL` — PostgreSQL connection string (auto-set by Replit)

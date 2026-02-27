@@ -28,6 +28,7 @@ def create_app(config_name=None):
     from .routes.admin.payments import admin_payments_bp
     from .routes.admin.coupons import admin_coupons_bp
     from .routes.admin.settings import admin_settings_bp
+    from .routes.admin.messaging import admin_messaging_bp
 
     app.register_blueprint(public_bp)
     app.register_blueprint(booking_bp, url_prefix="/book")
@@ -39,6 +40,7 @@ def create_app(config_name=None):
     app.register_blueprint(admin_payments_bp, url_prefix="/admin/payments")
     app.register_blueprint(admin_coupons_bp, url_prefix="/admin/coupons")
     app.register_blueprint(admin_settings_bp, url_prefix="/admin/settings")
+    app.register_blueprint(admin_messaging_bp, url_prefix="/admin/messaging")
 
     # Import models so they're registered with SQLAlchemy
     from . import models  # noqa: F401
