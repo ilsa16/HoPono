@@ -1,4 +1,4 @@
-run = "gunicorn --bind 0.0.0.0:5000 --workers 2 'app:create_app()'"
+run = "pip install -r requirements.txt && python run.py"
 entrypoint = "run.py"
 
 [nix]
@@ -6,4 +6,7 @@ channel = "stable-24_05"
 
 [env]
 FLASK_APP = "app"
-FLASK_ENV = "production"
+FLASK_ENV = "development"
+
+[deployment]
+run = ["sh", "-c", "pip install -r requirements.txt && gunicorn --bind 0.0.0.0:5000 --workers 2 'app:create_app()'"]
