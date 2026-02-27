@@ -7,16 +7,164 @@ from app.models.availability import AvailabilityWindow
 admin_availability_bp = Blueprint("admin_availability", __name__)
 
 
+def _monday_of(d):
+    return d - timedelta(days=d.weekday())
+
+
 @admin_availability_bp.route("/")
 @login_required
 def manage_availability():
-    # Show current and future availability
     windows = (
         AvailabilityWindow.query.filter(AvailabilityWindow.date >= date.today())
         .order_by(AvailabilityWindow.date, AvailabilityWindow.start_time)
         .all()
     )
     return render_template("admin/availability.html", windows=windows)
+
+
+@admin_availability_bp.route("/api/week")
+@login_required
+def api_week():
+    start_str = request.args.get("start")
+    if not start_str:
+        start_date = _monday_of(date.today())
+    else:
+        start_date = datetime.strptime(start_str, "%Y-%m-%d").date()
+
+    end_date = start_date + timedelta(days=6)
+
+    windows = (
+        AvailabilityWindow.query
+        .filter(AvailabilityWindow.date.between(start_date, end_date))
+        .order_by(AvailabilityWindow.date, AvailabilityWindow.start_time)
+        .all()
+    )
+
+    result = {}
+    for d in range(7):
+        day = start_date + timedelta(days=d)
+        result[day.isoformat()] = []
+
+    for w in windows:
+        result[w.date.isoformat()].append({
+            "id": w.id,
+            "start_time": w.start_time.strftime("%H:%M"),
+            "end_time": w.end_time.strftime("%H:%M"),
+        })
+
+    return jsonify({"week_start": start_date.isoformat(), "days": result})
+
+
+@admin_availability_bp.route("/api/add", methods=["POST"])
+@login_required
+def api_add():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    window_date = data.get("date")
+    start_time = data.get("start_time")
+    end_time = data.get("end_time")
+
+    if not all([window_date, start_time, end_time]):
+        return jsonify({"error": "date, start_time, and end_time are required"}), 400
+
+    parsed_date = datetime.strptime(window_date, "%Y-%m-%d").date()
+    parsed_start = datetime.strptime(start_time, "%H:%M").time()
+    parsed_end = datetime.strptime(end_time, "%H:%M").time()
+
+    if parsed_start >= parsed_end:
+        return jsonify({"error": "Start time must be before end time"}), 400
+
+    existing = AvailabilityWindow.query.filter_by(
+        date=parsed_date, start_time=parsed_start, end_time=parsed_end
+    ).first()
+    if existing:
+        return jsonify({"error": "This window already exists", "id": existing.id}), 409
+
+    window = AvailabilityWindow(
+        date=parsed_date,
+        start_time=parsed_start,
+        end_time=parsed_end,
+    )
+    db.session.add(window)
+    db.session.commit()
+
+    return jsonify({
+        "id": window.id,
+        "date": window.date.isoformat(),
+        "start_time": window.start_time.strftime("%H:%M"),
+        "end_time": window.end_time.strftime("%H:%M"),
+    }), 201
+
+
+@admin_availability_bp.route("/api/delete", methods=["POST"])
+@login_required
+def api_delete():
+    data = request.get_json()
+    if not data or not data.get("id"):
+        return jsonify({"error": "id is required"}), 400
+
+    window = db.session.get(AvailabilityWindow, data["id"])
+    if not window:
+        return jsonify({"error": "Window not found"}), 404
+
+    db.session.delete(window)
+    db.session.commit()
+    return jsonify({"deleted": True})
+
+
+@admin_availability_bp.route("/api/clear-day", methods=["POST"])
+@login_required
+def api_clear_day():
+    data = request.get_json()
+    if not data or not data.get("date"):
+        return jsonify({"error": "date is required"}), 400
+
+    parsed_date = datetime.strptime(data["date"], "%Y-%m-%d").date()
+    count = AvailabilityWindow.query.filter_by(date=parsed_date).delete()
+    db.session.commit()
+    return jsonify({"deleted_count": count})
+
+
+@admin_availability_bp.route("/api/copy-week", methods=["POST"])
+@login_required
+def api_copy_week():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    source_str = data.get("source_start")
+    target_str = data.get("target_start")
+
+    if not source_str or not target_str:
+        return jsonify({"error": "source_start and target_start are required"}), 400
+
+    source_start = datetime.strptime(source_str, "%Y-%m-%d").date()
+    target_start = datetime.strptime(target_str, "%Y-%m-%d").date()
+    day_offset = (target_start - source_start).days
+
+    source_windows = AvailabilityWindow.query.filter(
+        AvailabilityWindow.date.between(source_start, source_start + timedelta(days=6))
+    ).all()
+
+    count = 0
+    for window in source_windows:
+        new_date = window.date + timedelta(days=day_offset)
+        existing = AvailabilityWindow.query.filter_by(
+            date=new_date, start_time=window.start_time, end_time=window.end_time
+        ).first()
+        if not existing:
+            new_window = AvailabilityWindow(
+                date=new_date,
+                start_time=window.start_time,
+                end_time=window.end_time,
+            )
+            db.session.add(new_window)
+            count += 1
+
+    db.session.commit()
+    return jsonify({"copied": count})
 
 
 @admin_availability_bp.route("/add", methods=["POST"])

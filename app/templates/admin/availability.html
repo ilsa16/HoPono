@@ -1,98 +1,333 @@
 {% extends "admin/base_admin.html" %}
 {% block title %}Availability{% endblock %}
-{% block page_title %}Manage Availability{% endblock %}
+{% block page_title %}Availability{% endblock %}
 
 {% block admin_content %}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Add Window -->
-    <div class="lg:col-span-1">
-        <div class="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 class="font-semibold text-gray-800 mb-4">Add Availability</h2>
-            <form method="POST" action="{{ url_for('admin_availability.add_window') }}" class="space-y-3">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div>
-                    <label class="block text-xs text-gray-500 mb-1">Date</label>
-                    <input type="date" name="date" required
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-500 mb-1">Start Time</label>
-                    <input type="time" name="start_time" value="10:00" required
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-500 mb-1">End Time</label>
-                    <input type="time" name="end_time" value="18:00" required
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                </div>
-                <button type="submit" class="w-full bg-hopono-blue text-white py-2 rounded-lg text-sm font-medium hover:bg-hopono-blue-dark transition">
-                    Add Window
-                </button>
-            </form>
-        </div>
+<div x-data="availabilityManager()" x-init="loadWeek()">
 
-        <!-- Copy Week -->
-        <div class="bg-white rounded-xl border border-gray-200 p-6 mt-4">
-            <h2 class="font-semibold text-gray-800 mb-4">Copy Week</h2>
-            <form method="POST" action="{{ url_for('admin_availability.copy_week') }}" class="space-y-3">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div>
-                    <label class="block text-xs text-gray-500 mb-1">Source Week (Monday)</label>
-                    <input type="date" name="source_week" required
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-500 mb-1">Target Week (Monday)</label>
-                    <input type="date" name="target_week" required
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                </div>
-                <button type="submit" class="w-full bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition">
-                    Copy
-                </button>
-            </form>
+    <!-- Week Navigation -->
+    <div class="flex items-center justify-between mb-4">
+        <button @click="prevWeek()" class="p-2 rounded-lg bg-white border border-gray-200 active:bg-gray-100 touch-manipulation">
+            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="text-center">
+            <button @click="goToday()" class="text-xs text-hopono-blue font-medium mb-0.5 block">Today</button>
+            <h2 class="text-sm font-semibold text-gray-800" x-text="weekLabel"></h2>
         </div>
+        <button @click="nextWeek()" class="p-2 rounded-lg bg-white border border-gray-200 active:bg-gray-100 touch-manipulation">
+            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
     </div>
 
-    <!-- Windows List -->
-    <div class="lg:col-span-2">
-        <div class="bg-white rounded-xl border border-gray-200">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h2 class="font-semibold text-gray-800">Upcoming Availability</h2>
+    <!-- Loading -->
+    <div x-show="loading" class="text-center py-12">
+        <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-hopono-blue"></div>
+    </div>
+
+    <!-- Day Cards -->
+    <div x-show="!loading" class="space-y-2">
+        <template x-for="day in weekDays" :key="day.dateStr">
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden"
+                 :class="day.isToday ? 'ring-2 ring-hopono-blue/30' : ''">
+
+                <!-- Day Header -->
+                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="text-center w-10">
+                            <div class="text-[10px] uppercase font-semibold tracking-wide"
+                                 :class="day.isToday ? 'text-hopono-blue' : 'text-gray-400'"
+                                 x-text="day.dayShort"></div>
+                            <div class="text-lg font-bold leading-tight"
+                                 :class="day.isToday ? 'text-hopono-blue' : 'text-gray-800'"
+                                 x-text="day.dayNum"></div>
+                        </div>
+                        <div>
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-full"
+                                  :class="day.windows.length > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'"
+                                  x-text="day.windows.length > 0 ? 'Available' : 'Off'"></span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <!-- Quick presets -->
+                        <button @click="quickAdd(day.dateStr, '10:00', '18:00')"
+                                x-show="day.windows.length === 0"
+                                class="text-[10px] font-semibold px-2.5 py-1.5 rounded-lg bg-hopono-blue/10 text-hopono-blue active:bg-hopono-blue/20 touch-manipulation whitespace-nowrap">
+                            + Full day
+                        </button>
+                        <button @click="toggleCustom(day.dateStr)"
+                                class="p-2 rounded-lg text-gray-400 hover:text-hopono-blue active:bg-gray-100 touch-manipulation">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Windows List -->
+                <div x-show="day.windows.length > 0" class="px-4 py-2 space-y-1.5">
+                    <template x-for="win in day.windows" :key="win.id">
+                        <div class="flex items-center justify-between py-1.5 group">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-1 h-6 rounded-full bg-hopono-blue"></div>
+                                <span class="text-sm font-medium text-gray-700" x-text="win.start_time + ' – ' + win.end_time"></span>
+                            </div>
+                            <button @click="deleteWindow(win.id, day.dateStr)"
+                                    class="p-1.5 rounded-lg text-gray-300 hover:text-red-500 active:bg-red-50 touch-manipulation">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Custom Time Picker (inline) -->
+                <div x-show="customDay === day.dateStr" x-transition class="px-4 py-3 bg-gray-50 border-t border-gray-100">
+                    <div class="text-xs font-medium text-gray-500 mb-2">Quick presets</div>
+                    <div class="flex flex-wrap gap-1.5 mb-3">
+                        <button @click="quickAdd(day.dateStr, '09:00', '17:00')" class="text-xs px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-600 active:bg-hopono-blue/10 touch-manipulation">9–17</button>
+                        <button @click="quickAdd(day.dateStr, '10:00', '18:00')" class="text-xs px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-600 active:bg-hopono-blue/10 touch-manipulation">10–18</button>
+                        <button @click="quickAdd(day.dateStr, '10:00', '14:00')" class="text-xs px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-600 active:bg-hopono-blue/10 touch-manipulation">10–14</button>
+                        <button @click="quickAdd(day.dateStr, '14:00', '20:00')" class="text-xs px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-600 active:bg-hopono-blue/10 touch-manipulation">14–20</button>
+                        <button @click="quickAdd(day.dateStr, '12:00', '20:00')" class="text-xs px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-600 active:bg-hopono-blue/10 touch-manipulation">12–20</button>
+                    </div>
+                    <div class="text-xs font-medium text-gray-500 mb-2">Custom</div>
+                    <div class="flex items-center space-x-2">
+                        <input type="time" x-model="customStart" value="10:00"
+                               class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm touch-manipulation">
+                        <span class="text-gray-400 text-sm">to</span>
+                        <input type="time" x-model="customEnd" value="18:00"
+                               class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm touch-manipulation">
+                        <button @click="addCustom(day.dateStr)"
+                                class="bg-hopono-blue text-white px-4 py-2 rounded-lg text-sm font-medium active:bg-hopono-blue-dark touch-manipulation whitespace-nowrap">
+                            Add
+                        </button>
+                    </div>
+                    <p x-show="customError" x-text="customError" class="text-xs text-red-500 mt-1"></p>
+                </div>
             </div>
-            {% if windows %}
-            <table class="w-full text-sm">
-                <thead class="bg-gray-50 text-gray-600">
-                    <tr>
-                        <th class="px-4 py-3 text-left font-medium">Date</th>
-                        <th class="px-4 py-3 text-left font-medium">Day</th>
-                        <th class="px-4 py-3 text-left font-medium">Start</th>
-                        <th class="px-4 py-3 text-left font-medium">End</th>
-                        <th class="px-4 py-3 text-left font-medium"></th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    {% for window in windows %}
-                    <tr>
-                        <td class="px-4 py-3 font-medium">{{ window.date.strftime('%d %b %Y') }}</td>
-                        <td class="px-4 py-3 text-gray-500">{{ window.date.strftime('%A') }}</td>
-                        <td class="px-4 py-3">{{ window.start_time.strftime('%H:%M') }}</td>
-                        <td class="px-4 py-3">{{ window.end_time.strftime('%H:%M') }}</td>
-                        <td class="px-4 py-3">
-                            <form method="POST" action="{{ url_for('admin_availability.delete_window', window_id=window.id) }}" class="inline">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button class="text-red-500 hover:text-red-700 text-xs" onclick="return confirm('Remove this window?')">
-                                    Remove
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <div class="p-8 text-center text-gray-400">No upcoming availability windows.</div>
-            {% endif %}
+        </template>
+    </div>
+
+    <!-- Bottom Actions -->
+    <div x-show="!loading" class="mt-4 space-y-2">
+        <div class="flex space-x-2">
+            <button @click="copyToNextWeek()"
+                    class="flex-1 bg-white border border-gray-200 text-gray-700 font-medium py-3 rounded-xl text-sm active:bg-gray-50 touch-manipulation"
+                    :disabled="copyingWeek">
+                <span x-show="!copyingWeek">Copy to next week</span>
+                <span x-show="copyingWeek" class="text-gray-400">Copying...</span>
+            </button>
+            <button @click="clearWeek()"
+                    class="bg-white border border-gray-200 text-red-500 font-medium py-3 px-5 rounded-xl text-sm active:bg-red-50 touch-manipulation">
+                Clear
+            </button>
         </div>
+        <p x-show="statusMsg" x-text="statusMsg"
+           x-transition
+           class="text-center text-xs text-green-600 font-medium py-1"></p>
     </div>
 </div>
+{% endblock %}
+
+{% block admin_scripts %}
+<script>
+function availabilityManager() {
+    return {
+        weekStart: null,
+        weekDays: [],
+        loading: true,
+        customDay: null,
+        customStart: '10:00',
+        customEnd: '18:00',
+        customError: '',
+        copyingWeek: false,
+        statusMsg: '',
+
+        get weekLabel() {
+            if (!this.weekStart) return '';
+            const s = new Date(this.weekStart + 'T00:00:00');
+            const e = new Date(s);
+            e.setDate(e.getDate() + 6);
+            const opts = { month: 'short', day: 'numeric' };
+            const sameMonth = s.getMonth() === e.getMonth();
+            if (sameMonth) {
+                return s.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) + ' – ' + e.getDate() + ', ' + s.getFullYear();
+            }
+            return s.toLocaleDateString('en-US', opts) + ' – ' + e.toLocaleDateString('en-US', opts) + ', ' + e.getFullYear();
+        },
+
+        mondayOf(d) {
+            const dt = new Date(d);
+            const day = dt.getDay();
+            const diff = dt.getDate() - day + (day === 0 ? -6 : 1);
+            dt.setDate(diff);
+            return dt.toISOString().split('T')[0];
+        },
+
+        prevWeek() {
+            const d = new Date(this.weekStart + 'T00:00:00');
+            d.setDate(d.getDate() - 7);
+            this.weekStart = d.toISOString().split('T')[0];
+            this.loadWeek();
+        },
+
+        nextWeek() {
+            const d = new Date(this.weekStart + 'T00:00:00');
+            d.setDate(d.getDate() + 7);
+            this.weekStart = d.toISOString().split('T')[0];
+            this.loadWeek();
+        },
+
+        goToday() {
+            this.weekStart = this.mondayOf(new Date());
+            this.loadWeek();
+        },
+
+        async loadWeek() {
+            if (!this.weekStart) {
+                this.weekStart = this.mondayOf(new Date());
+            }
+            this.loading = true;
+            this.customDay = null;
+            this.statusMsg = '';
+            try {
+                const resp = await fetch(`/admin/availability/api/week?start=${this.weekStart}`);
+                const data = await resp.json();
+                const today = new Date().toISOString().split('T')[0];
+                const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+                this.weekDays = Object.entries(data.days).sort().map(([dateStr, windows], i) => {
+                    const d = new Date(dateStr + 'T00:00:00');
+                    return {
+                        dateStr,
+                        dayShort: dayNames[i],
+                        dayNum: d.getDate(),
+                        isToday: dateStr === today,
+                        windows: windows,
+                    };
+                });
+            } catch (e) {
+                console.error('Failed to load week', e);
+            }
+            this.loading = false;
+        },
+
+        toggleCustom(dateStr) {
+            this.customDay = this.customDay === dateStr ? null : dateStr;
+            this.customError = '';
+            this.customStart = '10:00';
+            this.customEnd = '18:00';
+        },
+
+        async quickAdd(dateStr, start, end) {
+            await this.addWindow(dateStr, start, end);
+        },
+
+        async addCustom(dateStr) {
+            this.customError = '';
+            if (!this.customStart || !this.customEnd) {
+                this.customError = 'Please set both start and end times';
+                return;
+            }
+            if (this.customStart >= this.customEnd) {
+                this.customError = 'Start must be before end';
+                return;
+            }
+            await this.addWindow(dateStr, this.customStart, this.customEnd);
+            this.customDay = null;
+        },
+
+        async addWindow(dateStr, start, end) {
+            try {
+                const resp = await fetch('/admin/availability/api/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': this.getCsrf() },
+                    body: JSON.stringify({ date: dateStr, start_time: start, end_time: end })
+                });
+                const data = await resp.json();
+                if (resp.ok) {
+                    const day = this.weekDays.find(d => d.dateStr === dateStr);
+                    if (day) {
+                        day.windows.push(data);
+                        day.windows.sort((a, b) => a.start_time.localeCompare(b.start_time));
+                    }
+                    this.flash('Added ' + start + '–' + end);
+                } else {
+                    this.customError = data.error || 'Failed to add';
+                }
+            } catch (e) {
+                this.customError = 'Network error';
+            }
+        },
+
+        async deleteWindow(id, dateStr) {
+            try {
+                const resp = await fetch('/admin/availability/api/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': this.getCsrf() },
+                    body: JSON.stringify({ id })
+                });
+                if (resp.ok) {
+                    const day = this.weekDays.find(d => d.dateStr === dateStr);
+                    if (day) {
+                        day.windows = day.windows.filter(w => w.id !== id);
+                    }
+                    this.flash('Removed');
+                } else {
+                    const data = await resp.json();
+                    this.flash(data.error || 'Failed to remove');
+                }
+            } catch (e) {
+                this.flash('Network error');
+            }
+        },
+
+        async copyToNextWeek() {
+            this.copyingWeek = true;
+            try {
+                const nextStart = new Date(this.weekStart + 'T00:00:00');
+                nextStart.setDate(nextStart.getDate() + 7);
+                const targetStr = nextStart.toISOString().split('T')[0];
+
+                const resp = await fetch('/admin/availability/api/copy-week', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': this.getCsrf() },
+                    body: JSON.stringify({ source_start: this.weekStart, target_start: targetStr })
+                });
+                const data = await resp.json();
+                if (resp.ok) {
+                    this.flash('Copied ' + data.copied + ' windows to next week');
+                } else {
+                    this.flash(data.error || 'Copy failed');
+                }
+            } catch (e) {
+                this.flash('Copy failed — network error');
+            }
+            this.copyingWeek = false;
+        },
+
+        async clearWeek() {
+            if (!confirm('Clear all availability for this week?')) return;
+            for (const day of this.weekDays) {
+                if (day.windows.length > 0) {
+                    await fetch('/admin/availability/api/clear-day', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': this.getCsrf() },
+                        body: JSON.stringify({ date: day.dateStr })
+                    });
+                    day.windows = [];
+                }
+            }
+            this.flash('Week cleared');
+        },
+
+        flash(msg) {
+            this.statusMsg = msg;
+            setTimeout(() => { this.statusMsg = ''; }, 3000);
+        },
+
+        getCsrf() {
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            return meta ? meta.getAttribute('content') : '';
+        }
+    };
+}
+</script>
 {% endblock %}
