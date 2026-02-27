@@ -25,3 +25,8 @@ def services():
 @public_bp.route("/contact")
 def contact():
     return render_template("public/contact.html")
+
+
+@public_bp.route("/privacy")
+def privacy():
+    return render_template("public/privacy.html")

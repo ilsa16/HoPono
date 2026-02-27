@@ -43,6 +43,7 @@ def create_booking(
     reminder_preference="email",
     coupon_code=None,
     source="online",
+    marketing_consent=False,
 ):
     client_name, client_email, client_phone = _validate_inputs(
         client_name, client_email, client_phone
@@ -60,10 +61,15 @@ def create_booking(
     # Find or create client
     client = Client.query.filter_by(email=client_email.lower().strip()).first()
     if client:
-        # Update info for returning client
         client.name = client_name
         client.phone = client_phone
         client.reminder_preference = reminder_preference
+        if marketing_consent and not client.marketing_consent:
+            client.marketing_consent = True
+            client.marketing_consented_at = datetime.utcnow()
+        elif not marketing_consent:
+            client.marketing_consent = False
+            client.marketing_consented_at = None
         client.updated_at = datetime.utcnow()
     else:
         client = Client(
@@ -73,6 +79,8 @@ def create_booking(
             reminder_preference=reminder_preference,
             gdpr_consent=True,
             gdpr_consented_at=datetime.utcnow(),
+            marketing_consent=marketing_consent,
+            marketing_consented_at=datetime.utcnow() if marketing_consent else None,
         )
         db.session.add(client)
         db.session.flush()  # Get client.id

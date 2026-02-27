@@ -282,14 +282,21 @@
                        :class="couponValid ? 'text-green-400' : 'text-red-400'"></p>
                 </div>
 
-                <div class="pt-4 border-t border-white/5">
+                <div class="pt-4 border-t border-white/5 space-y-3">
                     <label class="flex items-start space-x-3">
                         <input type="checkbox" required
                                class="mt-1 rounded border-white/20 bg-hopono-surface text-hopono-gold focus:ring-hopono-gold">
                         <span class="text-sm text-white/40">
-                            I consent to HoPono Massage storing my personal data (name, email, phone) for
-                            the purpose of managing my appointment and sending reminders. My data will be
-                            handled in accordance with GDPR regulations and will not be shared with third parties. *
+                            I consent to HoPono Massage storing my personal data for managing my appointment
+                            and sending reminders, in accordance with our
+                            <a href="{{ url_for('public.privacy') }}" target="_blank" class="text-hopono-gold hover:underline">Privacy Policy</a>. *
+                        </span>
+                    </label>
+                    <label class="flex items-start space-x-3">
+                        <input type="checkbox" name="marketing_consent" value="1"
+                               class="mt-1 rounded border-white/20 bg-hopono-surface text-hopono-gold focus:ring-hopono-gold">
+                        <span class="text-sm text-white/40">
+                            I'd like to receive promotions, offers and wellness tips from HoPono Massage via email or SMS. (Optional)
                         </span>
                     </label>
                 </div>

@@ -24,6 +24,27 @@
         </div>
     </div>
 
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+            <p class="text-xs text-gray-500">GDPR Consent</p>
+            <p class="font-medium text-sm">
+                {% if client.gdpr_consent %}
+                <span class="text-green-600">Yes</span>
+                {% if client.gdpr_consented_at %}<span class="text-xs text-gray-400 ml-1">{{ client.gdpr_consented_at.strftime('%d %b %Y') }}</span>{% endif %}
+                {% else %}<span class="text-red-600">No</span>{% endif %}
+            </p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+            <p class="text-xs text-gray-500">Marketing Consent</p>
+            <p class="font-medium text-sm">
+                {% if client.marketing_consent %}
+                <span class="text-green-600">Opted in</span>
+                {% if client.marketing_consented_at %}<span class="text-xs text-gray-400 ml-1">{{ client.marketing_consented_at.strftime('%d %b %Y') }}</span>{% endif %}
+                {% else %}<span class="text-gray-400">Not opted in</span>{% endif %}
+            </p>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Notes -->
         <div class="bg-white rounded-xl border border-gray-200">

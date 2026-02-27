@@ -64,6 +64,7 @@ def confirm():
             client_phone=request.form.get("country_code", "+357") + request.form.get("phone", ""),
             reminder_preference=request.form.get("reminder_preference", "email"),
             coupon_code=request.form.get("coupon_code"),
+            marketing_consent=bool(request.form.get("marketing_consent")),
         )
         return redirect(url_for("booking.success", booking_id=booking.id))
     except ValueError as e:

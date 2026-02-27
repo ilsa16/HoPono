@@ -12,6 +12,8 @@ class Client(db.Model):
     reminder_preference = db.Column(db.String(10), nullable=False, default="email")
     gdpr_consent = db.Column(db.Boolean, nullable=False, default=False)
     gdpr_consented_at = db.Column(db.DateTime)
+    marketing_consent = db.Column(db.Boolean, nullable=False, default=False)
+    marketing_consented_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
