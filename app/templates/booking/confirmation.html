@@ -74,10 +74,9 @@
         </div>
 
         <p class="text-white/40 text-sm mt-6 fade-up">
-            {% if booking.client.reminder_preference in ['phone', 'both'] %}
+            {% if booking.client.reminder_preference == 'phone' %}
             You will receive an SMS reminder before your appointment.
-            {% endif %}
-            {% if booking.client.reminder_preference in ['email', 'both'] %}
+            {% elif booking.client.reminder_preference == 'email' %}
             A confirmation email has been sent to {{ booking.client.email }}.
             {% endif %}
         </p>

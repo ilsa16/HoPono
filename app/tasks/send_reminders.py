@@ -63,7 +63,7 @@ def check_and_send_reminders(app):
             date_str = booking.date.strftime("%B %d, %Y")
 
             # Send SMS
-            if sms_enabled and client.reminder_preference in ("phone", "both"):
+            if sms_enabled and client.reminder_preference == "phone":
                 sms_text = build_reminder_sms(client.name, service.name, time_str)
                 success = send_sms(client.phone, sms_text)
                 log = ReminderLog(
@@ -76,7 +76,7 @@ def check_and_send_reminders(app):
                 db.session.add(log)
 
             # Send email
-            if email_enabled and client.reminder_preference in ("email", "both"):
+            if email_enabled and client.reminder_preference == "email":
                 html = build_reminder_email(client.name, service.name, date_str, time_str)
                 success = send_email(
                     client.email,
