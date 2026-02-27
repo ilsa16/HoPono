@@ -1,0 +1,98 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Availability{% endblock %}
+{% block page_title %}Manage Availability{% endblock %}
+
+{% block admin_content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Add Window -->
+    <div class="lg:col-span-1">
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 class="font-semibold text-gray-800 mb-4">Add Availability</h2>
+            <form method="POST" action="{{ url_for('admin_availability.add_window') }}" class="space-y-3">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Date</label>
+                    <input type="date" name="date" required
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Start Time</label>
+                    <input type="time" name="start_time" value="10:00" required
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">End Time</label>
+                    <input type="time" name="end_time" value="18:00" required
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <button type="submit" class="w-full bg-hopono-blue text-white py-2 rounded-lg text-sm font-medium hover:bg-hopono-blue-dark transition">
+                    Add Window
+                </button>
+            </form>
+        </div>
+
+        <!-- Copy Week -->
+        <div class="bg-white rounded-xl border border-gray-200 p-6 mt-4">
+            <h2 class="font-semibold text-gray-800 mb-4">Copy Week</h2>
+            <form method="POST" action="{{ url_for('admin_availability.copy_week') }}" class="space-y-3">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Source Week (Monday)</label>
+                    <input type="date" name="source_week" required
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Target Week (Monday)</label>
+                    <input type="date" name="target_week" required
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <button type="submit" class="w-full bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition">
+                    Copy
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Windows List -->
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-xl border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="font-semibold text-gray-800">Upcoming Availability</h2>
+            </div>
+            {% if windows %}
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-medium">Date</th>
+                        <th class="px-4 py-3 text-left font-medium">Day</th>
+                        <th class="px-4 py-3 text-left font-medium">Start</th>
+                        <th class="px-4 py-3 text-left font-medium">End</th>
+                        <th class="px-4 py-3 text-left font-medium"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for window in windows %}
+                    <tr>
+                        <td class="px-4 py-3 font-medium">{{ window.date.strftime('%d %b %Y') }}</td>
+                        <td class="px-4 py-3 text-gray-500">{{ window.date.strftime('%A') }}</td>
+                        <td class="px-4 py-3">{{ window.start_time.strftime('%H:%M') }}</td>
+                        <td class="px-4 py-3">{{ window.end_time.strftime('%H:%M') }}</td>
+                        <td class="px-4 py-3">
+                            <form method="POST" action="{{ url_for('admin_availability.delete_window', window_id=window.id) }}" class="inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button class="text-red-500 hover:text-red-700 text-xs" onclick="return confirm('Remove this window?')">
+                                    Remove
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="p-8 text-center text-gray-400">No upcoming availability windows.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

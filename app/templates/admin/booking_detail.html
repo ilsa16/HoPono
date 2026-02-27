@@ -1,0 +1,131 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Booking #{{ booking.id }}{% endblock %}
+{% block page_title %}Booking #{{ booking.id }}{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-3xl">
+    <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+        <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+                <p class="text-gray-500">Client</p>
+                <p class="font-medium">
+                    <a href="{{ url_for('admin_clients.client_detail', client_id=booking.client_id) }}"
+                       class="text-hopono-blue hover:underline">{{ booking.client.name }}</a>
+                </p>
+            </div>
+            <div>
+                <p class="text-gray-500">Service</p>
+                <p class="font-medium">{{ booking.service.name }} ({{ booking.service.duration_minutes }}min)</p>
+            </div>
+            <div>
+                <p class="text-gray-500">Date</p>
+                <p class="font-medium">{{ booking.date.strftime('%A, %B %d, %Y') }}</p>
+            </div>
+            <div>
+                <p class="text-gray-500">Time</p>
+                <p class="font-medium">{{ booking.start_time.strftime('%H:%M') }} — {{ booking.end_time.strftime('%H:%M') }}</p>
+            </div>
+            <div>
+                <p class="text-gray-500">Status</p>
+                <span class="text-xs font-medium px-2.5 py-1 rounded-full
+                    {% if booking.status == 'confirmed' %}bg-blue-100 text-blue-700
+                    {% elif booking.status == 'completed' %}bg-green-100 text-green-700
+                    {% elif booking.status == 'cancelled' %}bg-red-100 text-red-700
+                    {% else %}bg-gray-100 text-gray-600{% endif %}">
+                    {{ booking.status|capitalize }}
+                </span>
+            </div>
+            <div>
+                <p class="text-gray-500">Source</p>
+                <p class="font-medium">{{ booking.source|capitalize }}</p>
+            </div>
+            <div>
+                <p class="text-gray-500">Price</p>
+                <p class="font-medium">&euro;{{ "%.2f"|format(booking.service.price_eur) }}
+                    {% if booking.discount_amount %}
+                    <span class="text-green-600">(-&euro;{{ "%.2f"|format(booking.discount_amount) }})</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div>
+                <p class="text-gray-500">Payment</p>
+                {% if booking.payment %}
+                <p class="font-medium text-green-600">&euro;{{ "%.2f"|format(booking.payment.amount_eur) }} via {{ booking.payment.method|capitalize }}</p>
+                {% else %}
+                <p class="text-gray-400">Not recorded</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Actions -->
+    {% if booking.status not in ['cancelled'] %}
+    <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+        <h3 class="font-semibold text-gray-800 mb-4">Update Status</h3>
+        <div class="flex flex-wrap gap-2">
+            {% if booking.status != 'completed' %}
+            <form method="POST" action="{{ url_for('admin_bookings.update_status', booking_id=booking.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="status" value="completed">
+                <button class="bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-200 transition">
+                    Mark Completed
+                </button>
+            </form>
+            {% endif %}
+            {% if booking.status != 'no_show' %}
+            <form method="POST" action="{{ url_for('admin_bookings.update_status', booking_id=booking.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="status" value="no_show">
+                <button class="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-yellow-200 transition">
+                    Mark No-Show
+                </button>
+            </form>
+            {% endif %}
+            <form method="POST" action="{{ url_for('admin_bookings.update_status', booking_id=booking.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="status" value="cancelled">
+                <button class="bg-red-100 text-red-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-200 transition"
+                        onclick="return confirm('Cancel this booking?')">
+                    Cancel Booking
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Record Payment (if not yet recorded) -->
+    {% if not booking.payment and booking.status == 'completed' %}
+    <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+        <h3 class="font-semibold text-gray-800 mb-4">Record Payment</h3>
+        <form method="POST" action="{{ url_for('admin_payments.record_payment') }}" class="flex flex-wrap gap-3 items-end">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="booking_id" value="{{ booking.id }}">
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">Amount (&euro;)</label>
+                <input type="number" name="amount" step="0.01" value="{{ booking.service.price_eur - (booking.discount_amount or 0) }}"
+                       class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-24" required>
+            </div>
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">Method</label>
+                <select name="method" class="border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
+                    <option value="revolut">Revolut</option>
+                    <option value="cash">Cash</option>
+                    <option value="quickpay">Quickpay</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="flex-1">
+                <label class="block text-xs text-gray-500 mb-1">Notes</label>
+                <input type="text" name="notes" placeholder="Optional"
+                       class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full">
+            </div>
+            <button type="submit" class="bg-hopono-blue text-white px-4 py-2 rounded-lg text-sm hover:bg-hopono-blue-dark transition">
+                Record
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+    <a href="{{ url_for('admin_bookings.list_bookings') }}" class="text-hopono-blue hover:underline text-sm">&larr; Back to bookings</a>
+</div>
+{% endblock %}

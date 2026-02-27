@@ -1,0 +1,100 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Payments{% endblock %}
+{% block page_title %}Payments{% endblock %}
+
+{% block admin_content %}
+<div class="mb-6">
+    <form method="GET" class="flex gap-3 items-end">
+        <div>
+            <label class="block text-xs text-gray-500 mb-1">Date</label>
+            <input type="date" name="date" value="{{ view_date }}"
+                   class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <button type="submit" class="bg-hopono-blue text-white px-4 py-2 rounded-lg text-sm hover:bg-hopono-blue-dark transition">
+            View
+        </button>
+    </form>
+</div>
+
+{% if unpaid %}
+<div class="bg-white rounded-xl border border-gray-200 mb-6">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="font-semibold text-gray-800">Awaiting Payment ({{ unpaid|length }})</h2>
+    </div>
+    <div class="divide-y divide-gray-100">
+        {% for booking in unpaid %}
+        <div class="px-6 py-4">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <p class="font-medium text-gray-800">{{ booking.client.name }}</p>
+                    <p class="text-sm text-gray-500">{{ booking.service.name }} &middot; {{ booking.start_time.strftime('%H:%M') }}</p>
+                </div>
+                <span class="text-lg font-semibold text-hopono-blue-deeper">&euro;{{ "%.0f"|format(booking.service.price_eur - (booking.discount_amount or 0)) }}</span>
+            </div>
+            <form method="POST" action="{{ url_for('admin_payments.record_payment') }}" class="flex flex-wrap gap-3 items-end">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Amount</label>
+                    <input type="number" name="amount" step="0.01" value="{{ booking.service.price_eur - (booking.discount_amount or 0) }}"
+                           class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-24" required>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Method</label>
+                    <select name="method" class="border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
+                        <option value="revolut">Revolut</option>
+                        <option value="cash">Cash</option>
+                        <option value="quickpay">Quickpay</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="flex-1">
+                    <label class="block text-xs text-gray-500 mb-1">Notes</label>
+                    <input type="text" name="notes" placeholder="Optional" class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full">
+                </div>
+                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition">
+                    Record
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if paid %}
+<div class="bg-white rounded-xl border border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="font-semibold text-gray-800">Recorded Payments ({{ paid|length }})</h2>
+    </div>
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-3 text-left font-medium text-gray-600">Client</th>
+                <th class="px-4 py-3 text-left font-medium text-gray-600">Service</th>
+                <th class="px-4 py-3 text-left font-medium text-gray-600">Amount</th>
+                <th class="px-4 py-3 text-left font-medium text-gray-600">Method</th>
+                <th class="px-4 py-3 text-left font-medium text-gray-600">Notes</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {% for booking in paid %}
+            <tr>
+                <td class="px-4 py-3">{{ booking.client.name }}</td>
+                <td class="px-4 py-3 text-gray-500">{{ booking.service.name }}</td>
+                <td class="px-4 py-3 font-medium">&euro;{{ "%.2f"|format(booking.payment.amount_eur) }}</td>
+                <td class="px-4 py-3">{{ booking.payment.method|capitalize }}</td>
+                <td class="px-4 py-3 text-gray-400">{{ booking.payment.notes or '—' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if not unpaid and not paid %}
+<div class="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400">
+    No completed bookings for this date.
+</div>
+{% endif %}
+{% endblock %}

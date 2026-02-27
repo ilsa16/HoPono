@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}HoPono Massage Studio — Relaxation & Wellness in Nicosia{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative bg-hopono-blue-deeper overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-hopono-blue-deeper via-hopono-blue-dark to-hopono-blue opacity-90"></div>
+    <div class="relative max-w-7xl mx-auto px-4 py-24 sm:py-32 lg:py-40">
+        <div class="text-center max-w-3xl mx-auto">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-heading font-light text-white leading-tight mb-6">
+                Massage is a <span class="text-hopono-gold font-medium">Journey</span>
+            </h1>
+            <p class="text-xl sm:text-2xl text-white/80 font-light mb-4">
+                Relaxation and peace are the gifts you bring back with you.
+            </p>
+            <p class="text-lg text-white/60 mb-10 max-w-xl mx-auto">
+                Professional massage therapy in the heart of Nicosia.
+                Let us guide you on your path to wellness.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{{ url_for('booking.select_service') }}"
+                   class="bg-hopono-gold hover:bg-hopono-gold-light text-hopono-blue-deeper font-semibold px-8 py-3 rounded-full text-lg transition transform hover:scale-105">
+                    Book Your Session
+                </a>
+                <a href="{{ url_for('public.services') }}"
+                   class="border-2 border-white/30 hover:border-hopono-gold text-white hover:text-hopono-gold font-medium px-8 py-3 rounded-full text-lg transition">
+                    View Services
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- Decorative wave -->
+    <div class="absolute bottom-0 left-0 right-0">
+        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,80 C360,120 720,40 1440,80 L1440,120 L0,120 Z" fill="white"/>
+        </svg>
+    </div>
+</section>
+
+<!-- Services Preview -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl sm:text-4xl font-heading font-semibold text-hopono-blue-deeper mb-4">
+                Our Treatments
+            </h2>
+            <p class="text-gray-500 max-w-2xl mx-auto text-lg">
+                Each treatment is crafted to restore balance, ease tension, and bring you back to a state of calm.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for service in services %}
+            <div class="group bg-hopono-cream rounded-2xl p-8 hover:shadow-xl transition duration-300 border border-transparent hover:border-hopono-gold/30">
+                <div class="w-12 h-12 bg-hopono-blue/10 rounded-xl flex items-center justify-center mb-5">
+                    <svg class="w-6 h-6 text-hopono-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-heading font-semibold text-hopono-blue-deeper mb-1">{{ service.name }}</h3>
+                <p class="text-hopono-gold font-medium text-sm mb-3">{{ service.subtitle }}</p>
+                <p class="text-gray-600 text-sm leading-relaxed mb-4">{{ service.description[:120] }}{% if service.description|length > 120 %}...{% endif %}</p>
+                <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                    <span class="text-hopono-blue font-semibold">&euro;{{ "%.0f"|format(service.price_eur) }}</span>
+                    <span class="text-gray-400 text-sm">{{ service.duration_minutes }} min</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-12">
+            <a href="{{ url_for('booking.select_service') }}"
+               class="inline-block bg-hopono-blue hover:bg-hopono-blue-dark text-white font-semibold px-8 py-3 rounded-full transition">
+                Book an Appointment
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- About Preview -->
+<section class="py-20 bg-hopono-cream">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+                <h2 class="text-3xl sm:text-4xl font-heading font-semibold text-hopono-blue-deeper mb-6">
+                    Your Wellness, Our Passion
+                </h2>
+                <p class="text-gray-600 text-lg leading-relaxed mb-4">
+                    At HoPono, we believe that massage is more than just a treatment &mdash; it's an
+                    experience that nurtures body, mind, and spirit.
+                </p>
+                <p class="text-gray-600 leading-relaxed mb-6">
+                    Our therapist Evthoras brings years of experience and a deep understanding of
+                    various massage traditions, from Indian Ayurveda to Thai and Chinese techniques.
+                    Every session is tailored to your unique needs.
+                </p>
+                <a href="{{ url_for('public.about') }}"
+                   class="inline-block text-hopono-blue hover:text-hopono-blue-dark font-semibold transition">
+                    Learn more about us &rarr;
+                </a>
+            </div>
+            <div class="bg-gradient-to-br from-hopono-blue to-hopono-blue-dark rounded-2xl p-12 text-center">
+                <blockquote class="text-white text-xl italic font-light leading-relaxed">
+                    &ldquo;It is my pleasure to be a part of your journey towards wellness.&rdquo;
+                </blockquote>
+                <p class="text-hopono-gold mt-4 font-heading font-medium">&mdash; Evthoras</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-16 bg-hopono-blue">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+        <h2 class="text-3xl font-heading font-semibold text-white mb-4">
+            Ready to Begin Your Journey?
+        </h2>
+        <p class="text-white/70 text-lg mb-8">
+            Book your appointment today and take the first step towards relaxation.
+        </p>
+        <a href="{{ url_for('booking.select_service') }}"
+           class="inline-block bg-hopono-gold hover:bg-hopono-gold-light text-hopono-blue-deeper font-semibold px-10 py-4 rounded-full text-lg transition transform hover:scale-105">
+            Book Now
+        </a>
+    </div>
+</section>
+{% endblock %}

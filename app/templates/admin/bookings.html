@@ -1,0 +1,92 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Bookings{% endblock %}
+{% block page_title %}Bookings{% endblock %}
+
+{% block admin_content %}
+<div class="mb-6 flex flex-wrap gap-4 items-end">
+    <form method="GET" class="flex flex-wrap gap-3 items-end">
+        <div>
+            <label class="block text-xs text-gray-500 mb-1">Status</label>
+            <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                <option value="">All</option>
+                <option value="confirmed" {{ 'selected' if request.args.get('status') == 'confirmed' }}>Confirmed</option>
+                <option value="completed" {{ 'selected' if request.args.get('status') == 'completed' }}>Completed</option>
+                <option value="cancelled" {{ 'selected' if request.args.get('status') == 'cancelled' }}>Cancelled</option>
+                <option value="no_show" {{ 'selected' if request.args.get('status') == 'no_show' }}>No Show</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs text-gray-500 mb-1">From</label>
+            <input type="date" name="date_from" value="{{ request.args.get('date_from', '') }}"
+                   class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+            <label class="block text-xs text-gray-500 mb-1">To</label>
+            <input type="date" name="date_to" value="{{ request.args.get('date_to', '') }}"
+                   class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+            <label class="block text-xs text-gray-500 mb-1">Search</label>
+            <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Client name or email"
+                   class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <button type="submit" class="bg-hopono-blue text-white px-4 py-2 rounded-lg text-sm hover:bg-hopono-blue-dark transition">
+            Filter
+        </button>
+    </form>
+    <a href="{{ url_for('admin_bookings.new_booking') }}"
+       class="ml-auto bg-hopono-gold text-hopono-blue-deeper px-4 py-2 rounded-lg text-sm font-semibold hover:bg-hopono-gold-light transition">
+        + New Booking
+    </a>
+</div>
+
+<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-gray-600">
+            <tr>
+                <th class="px-4 py-3 text-left font-medium">Date</th>
+                <th class="px-4 py-3 text-left font-medium">Time</th>
+                <th class="px-4 py-3 text-left font-medium">Client</th>
+                <th class="px-4 py-3 text-left font-medium">Service</th>
+                <th class="px-4 py-3 text-left font-medium">Source</th>
+                <th class="px-4 py-3 text-left font-medium">Status</th>
+                <th class="px-4 py-3 text-left font-medium">Payment</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {% for booking in bookings %}
+            <tr class="hover:bg-gray-50 cursor-pointer" onclick="location.href='{{ url_for('admin_bookings.booking_detail', booking_id=booking.id) }}'">
+                <td class="px-4 py-3 font-medium">{{ booking.date.strftime('%d %b %Y') }}</td>
+                <td class="px-4 py-3">{{ booking.start_time.strftime('%H:%M') }}</td>
+                <td class="px-4 py-3">{{ booking.client.name }}</td>
+                <td class="px-4 py-3 text-gray-500">{{ booking.service.name }}</td>
+                <td class="px-4 py-3">
+                    <span class="text-xs px-2 py-0.5 rounded-full {{ 'bg-blue-50 text-blue-600' if booking.source == 'online' else 'bg-orange-50 text-orange-600' }}">
+                        {{ booking.source }}
+                    </span>
+                </td>
+                <td class="px-4 py-3">
+                    <span class="text-xs font-medium px-2 py-0.5 rounded-full
+                        {% if booking.status == 'confirmed' %}bg-blue-100 text-blue-700
+                        {% elif booking.status == 'completed' %}bg-green-100 text-green-700
+                        {% elif booking.status == 'cancelled' %}bg-red-100 text-red-700
+                        {% else %}bg-gray-100 text-gray-600{% endif %}">
+                        {{ booking.status|capitalize }}
+                    </span>
+                </td>
+                <td class="px-4 py-3">
+                    {% if booking.payment %}
+                    <span class="text-green-600 text-xs">&euro;{{ "%.0f"|format(booking.payment.amount_eur) }} ({{ booking.payment.method }})</span>
+                    {% else %}
+                    <span class="text-gray-400 text-xs">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if not bookings %}
+    <div class="p-8 text-center text-gray-400">No bookings found.</div>
+    {% endif %}
+</div>
+{% endblock %}

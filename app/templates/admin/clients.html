@@ -1,0 +1,45 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Clients{% endblock %}
+{% block page_title %}Clients{% endblock %}
+
+{% block admin_content %}
+<div class="mb-6">
+    <form method="GET" class="flex gap-3 items-end">
+        <div class="flex-1 max-w-sm">
+            <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Search by name, email, or phone..."
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <button type="submit" class="bg-hopono-blue text-white px-4 py-2 rounded-lg text-sm hover:bg-hopono-blue-dark transition">
+            Search
+        </button>
+    </form>
+</div>
+
+<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-gray-600">
+            <tr>
+                <th class="px-4 py-3 text-left font-medium">Name</th>
+                <th class="px-4 py-3 text-left font-medium">Email</th>
+                <th class="px-4 py-3 text-left font-medium">Phone</th>
+                <th class="px-4 py-3 text-left font-medium">Total Visits</th>
+                <th class="px-4 py-3 text-left font-medium">Reminder</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {% for client in clients %}
+            <tr class="hover:bg-gray-50 cursor-pointer" onclick="location.href='{{ url_for('admin_clients.client_detail', client_id=client.id) }}'">
+                <td class="px-4 py-3 font-medium text-hopono-blue">{{ client.name }}</td>
+                <td class="px-4 py-3 text-gray-500">{{ client.email }}</td>
+                <td class="px-4 py-3 text-gray-500">{{ client.phone }}</td>
+                <td class="px-4 py-3">{{ client.bookings.filter_by(status='completed').count() }}</td>
+                <td class="px-4 py-3 text-gray-400 text-xs">{{ client.reminder_preference }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if not clients %}
+    <div class="p-8 text-center text-gray-400">No clients found.</div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ client.name }}{% endblock %}
+{% block page_title %}{{ client.name }}{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-4xl">
+    <!-- Client Info -->
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+            <p class="text-xs text-gray-500">Email</p>
+            <p class="font-medium text-sm">{{ client.email }}</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+            <p class="text-xs text-gray-500">Phone</p>
+            <p class="font-medium text-sm">{{ client.phone }}</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+            <p class="text-xs text-gray-500">Total Visits</p>
+            <p class="text-2xl font-bold text-hopono-blue-deeper">{{ visit_count }}</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+            <p class="text-xs text-gray-500">Total Paid</p>
+            <p class="text-2xl font-bold text-hopono-blue-deeper">&euro;{{ "%.0f"|format(total_paid) }}</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Notes -->
+        <div class="bg-white rounded-xl border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="font-semibold text-gray-800">Notes</h2>
+            </div>
+            <div class="p-6">
+                <form method="POST" action="{{ url_for('admin_clients.add_note', client_id=client.id) }}" class="mb-4">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <textarea name="content" rows="3" required placeholder="Add a note about this client..."
+                              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-2 focus:ring-2 focus:ring-hopono-blue focus:border-transparent"></textarea>
+                    <button type="submit" class="bg-hopono-blue text-white px-4 py-1.5 rounded-lg text-sm hover:bg-hopono-blue-dark transition">
+                        Add Note
+                    </button>
+                </form>
+                <div class="space-y-3 max-h-96 overflow-y-auto">
+                    {% for note in notes %}
+                    <div class="bg-gray-50 rounded-lg p-3 text-sm">
+                        <p class="text-gray-700">{{ note.content }}</p>
+                        <p class="text-xs text-gray-400 mt-1">{{ note.created_at.strftime('%d %b %Y, %H:%M') }}</p>
+                    </div>
+                    {% endfor %}
+                    {% if not notes %}
+                    <p class="text-gray-400 text-sm">No notes yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking History -->
+        <div class="bg-white rounded-xl border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="font-semibold text-gray-800">Booking History</h2>
+            </div>
+            <div class="divide-y divide-gray-100 max-h-96 overflow-y-auto">
+                {% for booking in bookings %}
+                <a href="{{ url_for('admin_bookings.booking_detail', booking_id=booking.id) }}"
+                   class="flex items-center justify-between px-6 py-3 hover:bg-gray-50 transition text-sm">
+                    <div>
+                        <p class="font-medium">{{ booking.service.name }}</p>
+                        <p class="text-xs text-gray-500">{{ booking.date.strftime('%d %b %Y') }} at {{ booking.start_time.strftime('%H:%M') }}</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full
+                            {% if booking.status == 'confirmed' %}bg-blue-100 text-blue-700
+                            {% elif booking.status == 'completed' %}bg-green-100 text-green-700
+                            {% elif booking.status == 'cancelled' %}bg-red-100 text-red-700
+                            {% else %}bg-gray-100 text-gray-600{% endif %}">
+                            {{ booking.status|capitalize }}
+                        </span>
+                        {% if booking.payment %}
+                        <p class="text-xs text-green-600 mt-1">&euro;{{ "%.0f"|format(booking.payment.amount_eur) }} {{ booking.payment.method }}</p>
+                        {% endif %}
+                    </div>
+                </a>
+                {% endfor %}
+                {% if not bookings %}
+                <div class="p-6 text-center text-gray-400 text-sm">No bookings yet.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <a href="{{ url_for('admin_clients.list_clients') }}" class="inline-block mt-6 text-hopono-blue hover:underline text-sm">&larr; Back to clients</a>
+</div>
+{% endblock %}
