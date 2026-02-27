@@ -1,8 +1,34 @@
+import logging
 import os
-from flask import Flask, render_template
+from flask import Flask, abort, render_template, request
 from werkzeug.middleware.proxy_fix import ProxyFix
 from .config import config
 from .extensions import db, migrate, login_manager, csrf, limiter
+
+logger = logging.getLogger(__name__)
+
+_BLOCKED_PREFIXES = (
+    "/wp-admin", "/wp-login", "/wp-content", "/wp-includes",
+    "/wp-json", "/wp-cron", "/wp-config",
+    "/xmlrpc.php", "/eval-stdin.php", "/wp-signup.php",
+    "/phpmyadmin", "/pma", "/myadmin",
+    "/administrator", "/admin.php",
+    "/.env", "/.git", "/.svn", "/.htaccess", "/.htpasswd",
+    "/cgi-bin", "/shell", "/config.php",
+    "/vendor/phpunit", "/solr", "/actuator",
+)
+
+_BLOCKED_EXTENSIONS = (".php", ".asp", ".aspx", ".jsp", ".cgi")
+
+
+def _is_probe(path):
+    lower = path.lower()
+    if any(lower.startswith(p) for p in _BLOCKED_PREFIXES):
+        return True
+    if any(lower.endswith(ext) for ext in _BLOCKED_EXTENSIONS):
+        if lower not in ("/favicon.ico",):
+            return True
+    return False
 
 
 def create_app(config_name=None):
@@ -19,6 +45,16 @@ def create_app(config_name=None):
     login_manager.init_app(app)
     csrf.init_app(app)
     limiter.init_app(app)
+
+    @app.before_request
+    def block_probes():
+        if _is_probe(request.path):
+            logger.warning("Blocked probe: %s from %s", request.path, request.remote_addr)
+            abort(403)
+
+    @app.errorhandler(403)
+    def forbidden_handler(e):
+        return render_template("errors/403.html"), 403
 
     @app.errorhandler(429)
     def ratelimit_handler(e):
