@@ -69,7 +69,76 @@
                     <span>All treatments</span>
                 </button>
 
-                <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_280px] gap-6 lg:gap-8">
+                <div class="lg:hidden relative" x-ref="mobileCarouselWrap">
+                    <div class="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-2 -mx-2 px-2 scrollbar-hide"
+                         x-ref="mobileCarousel"
+                         @scroll.debounce.80ms="handleCarouselScroll($refs.mobileCarousel)"
+                         style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
+                        <template x-for="(svc, idx) in allServices" :key="'mcard-'+svc.id">
+                            <div class="snap-center flex-shrink-0 w-full min-w-full">
+                                <div class="bg-hopono-surface border border-white/5 rounded-2xl overflow-hidden">
+                                    <div class="relative aspect-[16/9] overflow-hidden" x-show="svc.image">
+                                        <img :src="'/static/images/services/' + svc.image" :alt="svc.name"
+                                             class="absolute inset-0 w-full h-full object-cover">
+                                    </div>
+                                    <div class="p-5">
+                                        <h3 class="text-xl font-heading font-semibold text-white mb-0.5" x-text="svc.name"></h3>
+                                        <p class="text-hopono-gold text-sm font-medium mb-3" x-text="svc.subtitle"></p>
+                                        <p class="text-white/45 text-sm leading-relaxed mb-4 line-clamp-3" x-text="svc.desc"></p>
+                                        <div class="space-y-1.5 mb-4">
+                                            <div class="flex items-center space-x-2 text-xs" x-show="svc.bestFor">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-hopono-gold flex-shrink-0"></span>
+                                                <span class="text-white/60"><span class="text-white/80 font-medium">Best for:</span> <span x-text="svc.bestFor"></span></span>
+                                            </div>
+                                            <div class="flex items-center space-x-2 text-xs" x-show="svc.pressure">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-hopono-gold flex-shrink-0"></span>
+                                                <span class="text-white/60"><span class="text-white/80 font-medium">Pressure:</span> <span x-text="svc.pressure"></span></span>
+                                            </div>
+                                            <div class="flex items-center space-x-2 text-xs">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-hopono-gold flex-shrink-0"></span>
+                                                <span class="text-white/60"><span x-text="svc.dur"></span> minutes &middot; full body</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center space-x-2">
+                                                <span class="text-xl font-heading font-bold text-white">&euro;<span x-text="svc.price"></span></span>
+                                                <span class="text-white/30">&middot;</span>
+                                                <span class="text-white/40 text-sm"><span x-text="svc.dur"></span> min</span>
+                                            </div>
+                                            <button @click="focusedServiceId = svc.id; confirmFocusSelection()"
+                                                    class="bg-hopono-gold hover:bg-hopono-gold-light text-hopono-dark font-semibold px-6 py-2.5 rounded-full transition duration-300 text-sm shadow-lg shadow-hopono-gold/20">
+                                                Continue
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <button @click="scrollCarousel(-1, $refs.mobileCarousel)"
+                            x-show="currentCardIndex > 0"
+                            class="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-hopono-dark/80 hover:bg-hopono-dark border border-white/10 text-white/70 hover:text-white w-9 h-9 rounded-full flex items-center justify-center transition duration-200 backdrop-blur-sm -ml-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                    <button @click="scrollCarousel(1, $refs.mobileCarousel)"
+                            x-show="currentCardIndex < allServices.length - 1"
+                            class="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-hopono-dark/80 hover:bg-hopono-dark border border-white/10 text-white/70 hover:text-white w-9 h-9 rounded-full flex items-center justify-center transition duration-200 backdrop-blur-sm -mr-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+
+                    <div class="flex justify-center items-center space-x-2 mt-4">
+                        <template x-for="(svc, idx) in allServices" :key="'dot-'+svc.id">
+                            <button @click="scrollToCard(idx, $refs.mobileCarousel)"
+                                    class="w-2 h-2 rounded-full transition-all duration-300"
+                                    :class="currentCardIndex === idx ? 'bg-hopono-gold w-6' : 'bg-white/20 hover:bg-white/40'">
+                            </button>
+                        </template>
+                    </div>
+                    <p class="text-center text-white/30 text-xs mt-2">Swipe to browse &middot; <span x-text="currentCardIndex + 1"></span> of <span x-text="allServices.length"></span></p>
+                </div>
+
+                <div class="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_280px] gap-8">
                     <div class="relative overflow-hidden rounded-2xl bg-hopono-surface border border-white/5 aspect-[3/4] max-h-[480px]">
                         <template x-for="svc in allServices" :key="'img-'+svc.id">
                             <img x-show="svc.image" :src="'/static/images/services/' + svc.image"
@@ -339,6 +408,7 @@ function bookingApp() {
         step: 1,
         focusMode: false,
         focusedServiceId: null,
+        currentCardIndex: 0,
         allServices: services,
 
         init() {
@@ -369,10 +439,44 @@ function bookingApp() {
         enterFocusMode(serviceId) {
             this.focusedServiceId = serviceId;
             this.focusMode = true;
+            const idx = this.allServices.findIndex(s => s.id === serviceId);
+            if (idx >= 0) {
+                this.currentCardIndex = idx;
+                this.$nextTick(() => {
+                    const carousel = this.$refs.mobileCarousel;
+                    if (carousel) this.scrollToCard(idx, carousel);
+                });
+            }
         },
 
         switchFocusedService(serviceId) {
             this.focusedServiceId = serviceId;
+        },
+
+        handleCarouselScroll(container) {
+            if (!container) return;
+            const cards = container.querySelectorAll(':scope > .snap-center');
+            if (!cards.length) return;
+            const cardWidth = cards[0].offsetWidth;
+            const gap = 16;
+            const idx = Math.round(container.scrollLeft / (cardWidth + gap));
+            const clampedIdx = Math.max(0, Math.min(idx, this.allServices.length - 1));
+            if (clampedIdx !== this.currentCardIndex) {
+                this.currentCardIndex = clampedIdx;
+                this.focusedServiceId = this.allServices[clampedIdx].id;
+            }
+        },
+
+        scrollToCard(idx, container) {
+            if (!container) return;
+            const cards = container.querySelectorAll(':scope > .snap-center');
+            if (cards[idx]) cards[idx].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        },
+
+        scrollCarousel(dir, container) {
+            if (!container) return;
+            const newIdx = Math.max(0, Math.min(this.currentCardIndex + dir, this.allServices.length - 1));
+            this.scrollToCard(newIdx, container);
         },
 
         confirmFocusSelection() {
