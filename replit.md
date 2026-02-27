@@ -70,6 +70,8 @@ migrations/             # Alembic migration files
 - `/admin/availability/api/delete` — Delete window (POST JSON)
 - `/admin/availability/api/clear-day` — Clear all windows for a day (POST JSON)
 - `/admin/availability/api/copy-week` — Copy week's availability (POST JSON)
+- `/admin/availability/api/month?year=YYYY&month=M` — Month availability JSON (count + windows per day)
+- `/admin/availability/api/copy-month` — Copy entire month's availability (POST JSON)
 
 ## Environment Variables
 - `DATABASE_URL` — PostgreSQL connection string (auto-set by Replit)

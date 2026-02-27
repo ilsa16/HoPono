@@ -1,3 +1,4 @@
+import calendar
 from datetime import date, datetime, timedelta
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required
@@ -151,6 +152,84 @@ def api_copy_week():
     count = 0
     for window in source_windows:
         new_date = window.date + timedelta(days=day_offset)
+        existing = AvailabilityWindow.query.filter_by(
+            date=new_date, start_time=window.start_time, end_time=window.end_time
+        ).first()
+        if not existing:
+            new_window = AvailabilityWindow(
+                date=new_date,
+                start_time=window.start_time,
+                end_time=window.end_time,
+            )
+            db.session.add(new_window)
+            count += 1
+
+    db.session.commit()
+    return jsonify({"copied": count})
+
+
+@admin_availability_bp.route("/api/month")
+@login_required
+def api_month():
+    try:
+        year = int(request.args.get("year", date.today().year))
+        month = int(request.args.get("month", date.today().month))
+    except ValueError:
+        return jsonify({"error": "Invalid year or month"}), 400
+
+    first_day = date(year, month, 1)
+    last_day = date(year, month, calendar.monthrange(year, month)[1])
+
+    windows = (
+        AvailabilityWindow.query
+        .filter(AvailabilityWindow.date.between(first_day, last_day))
+        .order_by(AvailabilityWindow.date, AvailabilityWindow.start_time)
+        .all()
+    )
+
+    result = {}
+    for w in windows:
+        key = w.date.isoformat()
+        if key not in result:
+            result[key] = {"count": 0, "windows": []}
+        result[key]["count"] += 1
+        result[key]["windows"].append({
+            "id": w.id,
+            "start_time": w.start_time.strftime("%H:%M"),
+            "end_time": w.end_time.strftime("%H:%M"),
+        })
+
+    return jsonify({"year": year, "month": month, "days": result})
+
+
+@admin_availability_bp.route("/api/copy-month", methods=["POST"])
+@login_required
+def api_copy_month():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    source_year = data.get("source_year")
+    source_month = data.get("source_month")
+    target_year = data.get("target_year")
+    target_month = data.get("target_month")
+
+    if not all([source_year, source_month, target_year, target_month]):
+        return jsonify({"error": "source_year, source_month, target_year, target_month required"}), 400
+
+    source_start = date(source_year, source_month, 1)
+    source_end = date(source_year, source_month, calendar.monthrange(source_year, source_month)[1])
+    target_last_day = calendar.monthrange(target_year, target_month)[1]
+
+    source_windows = AvailabilityWindow.query.filter(
+        AvailabilityWindow.date.between(source_start, source_end)
+    ).all()
+
+    count = 0
+    for window in source_windows:
+        target_day = min(window.date.day, target_last_day)
+        new_date = date(target_year, target_month, target_day)
+
         existing = AvailabilityWindow.query.filter_by(
             date=new_date, start_time=window.start_time, end_time=window.end_time
         ).first()
