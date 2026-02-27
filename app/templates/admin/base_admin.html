@@ -31,9 +31,12 @@
         <!-- Sidebar -->
         <aside class="fixed inset-y-0 left-0 z-40 w-64 bg-hopono-blue-deeper text-white transform transition-transform duration-200 lg:translate-x-0 lg:static"
                :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
-            <div class="p-6 border-b border-white/10">
-                <a href="{{ url_for('admin_dashboard.dashboard') }}" class="text-xl font-bold tracking-wide">
-                    HoPono <span class="text-hopono-gold text-sm font-normal">Admin</span>
+            <div class="px-6 py-4 border-b border-white/10">
+                <a href="{{ url_for('admin_dashboard.dashboard') }}" class="flex items-center space-x-2">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}"
+                         alt="HoPono"
+                         class="h-8 w-auto">
+                    <span class="text-hopono-gold text-xs font-medium">Admin</span>
                 </a>
             </div>
             <nav class="p-4 space-y-1">
