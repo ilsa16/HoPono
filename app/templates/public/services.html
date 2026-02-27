@@ -36,7 +36,7 @@
                             &euro;{{ "%.0f"|format(service.price_eur) }}
                         </div>
                         <div class="text-white/30 text-sm">{{ service.duration_minutes }} minutes</div>
-                        <a href="{{ url_for('booking.select_service') }}"
+                        <a href="{{ url_for('booking.select_service') }}?service={{ service.id }}"
                            class="inline-block mt-4 bg-hopono-gold hover:bg-hopono-gold-light text-hopono-dark font-semibold px-6 py-2 rounded-full text-sm transition duration-300 transform hover:scale-105">
                             Book This
                         </a>

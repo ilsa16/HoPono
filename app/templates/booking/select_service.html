@@ -309,6 +309,14 @@ function bookingApp() {
         focusedServiceId: null,
         allServices: services,
 
+        init() {
+            const params = new URLSearchParams(window.location.search);
+            const preselect = parseInt(params.get('service'));
+            if (preselect && this.allServices.find(s => s.id === preselect)) {
+                this.enterFocusMode(preselect);
+            }
+        },
+
         selectedServiceId: null,
         selectedServiceName: '',
         selectedDuration: 0,

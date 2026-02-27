@@ -233,7 +233,7 @@
                                         'text-transparent cursor-default': !day.inMonth,
                                         'text-white/15 cursor-default': day.inMonth && !day.selectable,
                                         'text-white/70 hover:bg-hopono-gold/20 cursor-pointer': day.inMonth && day.selectable && selectedDate !== day.dateStr,
-                                        'bg-hopono-gold text-hopono-dark': selectedDate === day.dateStr,
+                                        'bg-hopono-gold/30 text-hopono-dark font-bold': day.dateStr && selectedDate === day.dateStr,
                                     }"
                                     :disabled="!day.selectable"
                                     x-text="day.label">
@@ -443,7 +443,7 @@
                             <span class="text-hopono-gold font-bold text-lg">&euro;{{ "%.0f"|format(service.price_eur) }}</span>
                             <span class="text-white/30">{{ service.duration_minutes }} min</span>
                         </div>
-                        <a href="#book" @click.prevent="scrollToBooking()"
+                        <a href="#book" @click.prevent="enterFocusMode({{ service.id }}); $nextTick(() => scrollToBooking())"
                            class="block text-center bg-white/5 border border-white/10 hover:bg-hopono-gold hover:text-hopono-dark hover:border-hopono-gold text-white font-medium py-2.5 rounded-full text-sm transition duration-300">
                             Book Now
                         </a>
