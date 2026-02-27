@@ -63,7 +63,7 @@
                     <a href="{{ url_for('public.about') }}" class="text-white/90 hover:text-hopono-gold transition font-medium">About</a>
                     <a href="{{ url_for('public.services') }}" class="text-white/90 hover:text-hopono-gold transition font-medium">Services</a>
                     <a href="{{ url_for('public.contact') }}" class="text-white/90 hover:text-hopono-gold transition font-medium">Contact</a>
-                    <a href="{{ url_for('booking.select_service') }}" class="bg-hopono-gold hover:bg-hopono-gold-light text-hopono-blue-deeper font-semibold px-5 py-2 rounded-full transition">
+                    <a href="{{ url_for('public.home') }}#book" class="bg-hopono-gold hover:bg-hopono-gold-light text-hopono-blue-deeper font-semibold px-5 py-2 rounded-full transition">
                         Book Now
                     </a>
                 </div>
@@ -85,7 +85,7 @@
                 <a href="{{ url_for('public.about') }}" class="block text-white/90 hover:text-hopono-gold py-2">About</a>
                 <a href="{{ url_for('public.services') }}" class="block text-white/90 hover:text-hopono-gold py-2">Services</a>
                 <a href="{{ url_for('public.contact') }}" class="block text-white/90 hover:text-hopono-gold py-2">Contact</a>
-                <a href="{{ url_for('booking.select_service') }}" class="block bg-hopono-gold text-hopono-blue-deeper font-semibold px-5 py-2 rounded-full text-center mt-2">
+                <a href="{{ url_for('public.home') }}#book" class="block bg-hopono-gold text-hopono-blue-deeper font-semibold px-5 py-2 rounded-full text-center mt-2">
                     Book Now
                 </a>
             </div>
@@ -130,7 +130,7 @@
                     <h4 class="text-lg font-heading font-semibold text-white mb-3">Quick Links</h4>
                     <ul class="space-y-2 text-sm">
                         <li><a href="{{ url_for('public.services') }}" class="hover:text-hopono-gold transition">Our Services</a></li>
-                        <li><a href="{{ url_for('booking.select_service') }}" class="hover:text-hopono-gold transition">Book Appointment</a></li>
+                        <li><a href="{{ url_for('public.home') }}#book" class="hover:text-hopono-gold transition">Book Appointment</a></li>
                         <li><a href="{{ url_for('public.about') }}" class="hover:text-hopono-gold transition">About Us</a></li>
                         <li><a href="{{ url_for('public.contact') }}" class="hover:text-hopono-gold transition">Contact</a></li>
                     </ul>

@@ -42,7 +42,9 @@
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {% for service in services %}
-                <button @click="selectService({{ service.id }}, '{{ service.name }}', {{ service.duration_minutes }}, {{ service.price_eur }})"
+                <button
+                        x-data='{ svc: { id: {{ service.id }}, name: {{ service.name|tojson }}, dur: {{ service.duration_minutes }}, price: {{ service.price_eur }} } }'
+                        @click="selectService(svc.id, svc.name, svc.dur, svc.price)"
                         class="text-left bg-hopono-cream rounded-xl p-6 border-2 transition hover:shadow-md"
                         :class="selectedServiceId === {{ service.id }} ? 'border-hopono-gold shadow-md' : 'border-transparent hover:border-hopono-gold/30'">
                     <h3 class="font-heading font-semibold text-hopono-blue-deeper">{{ service.name }}</h3>
