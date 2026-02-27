@@ -16,8 +16,8 @@ def seed():
     app = create_app()
     with app.app_context():
         # Create admin user
-        username = os.environ.get("ADMIN_USERNAME", "admin")
-        password = os.environ.get("ADMIN_PASSWORD", "changeme")
+        username = os.environ.get("ADMIN_USERNAME", "hopono")
+        password = os.environ.get("ADMIN_PASSWORD", "Hopono2026!")
 
         if not AdminUser.query.filter_by(username=username).first():
             admin = AdminUser(

@@ -1,18 +1,19 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_required
+from app.routes.admin.devtools import devtools_required
 from app.services.reminder_service import send_sms, send_email
 
 admin_messaging_bp = Blueprint("admin_messaging", __name__)
 
 
 @admin_messaging_bp.route("/")
-@login_required
+@devtools_required
 def messaging_page():
     return render_template("admin/messaging.html")
 
 
 @admin_messaging_bp.route("/send-test-sms", methods=["POST"])
-@login_required
+@devtools_required
 def send_test_sms():
     phone = request.form.get("phone", "").strip()
     message = request.form.get("message", "").strip()
@@ -31,7 +32,7 @@ def send_test_sms():
 
 
 @admin_messaging_bp.route("/send-test-email", methods=["POST"])
-@login_required
+@devtools_required
 def send_test_email():
     to_email = request.form.get("to_email", "").strip()
     subject = request.form.get("subject", "").strip()

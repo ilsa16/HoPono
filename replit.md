@@ -50,7 +50,8 @@ app/
       payments.py       # Payment tracking
       coupons.py        # Coupon management
       settings.py       # App settings
-      messaging.py      # Test SMS/Email sending page
+      devtools.py       # Password-gated developer tools section
+      messaging.py      # Test SMS/Email sending (behind devtools gate)
   services/
     booking_service.py  # Booking creation logic
     slot_engine.py      # Available slot calculation
@@ -84,7 +85,8 @@ migrations/             # Alembic migration files
 - `/admin/availability/api/copy-week` — Copy week's availability (POST JSON)
 - `/admin/availability/api/month?year=YYYY&month=M` — Month availability JSON (count + windows per day)
 - `/admin/availability/api/copy-month` — Copy entire month's availability (POST JSON)
-- `/admin/messaging` — Test SMS and email sending page
+- `/admin/devtools/` — Developer Tools hub (password-gated)
+- `/admin/messaging` — Test SMS and email sending (requires devtools access)
 
 ## Environment Variables
 - `DATABASE_URL` — PostgreSQL connection string (auto-set by Replit)
