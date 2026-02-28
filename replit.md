@@ -15,7 +15,8 @@ A Flask-based booking and management system for HoPono Massage, a massage therap
 - **Treatment Selector**: Two-state product configurator on homepage and /book page:
   - State A (Grid Browse): 2x3 card grid; clicking a card enters State B
   - State B (Focus Mode): 3-column layout — portrait image (left), service details/description/metadata/CTA (center), compact service rail (right). Service rail allows switching the focused service with crossfade. "All treatments" back-link returns to State A. On mobile, columns stack vertically.
-  - Alpine.js state: `focusMode`, `focusedServiceId`, `allServices[]` array populated from Jinja `{{ services }}`, computed `focusedService` getter, `enterFocusMode()`, `switchFocusedService()`, `confirmFocusSelection()` methods
+  - Mobile: Swipeable horizontal card carousel (CSS scroll-snap, no external library); dots + arrows + counter navigation; cards show image, details, price, Continue CTA
+  - Alpine.js state: `focusMode`, `focusedServiceId`, `currentCardIndex`, `allServices[]` array populated from Jinja `{{ services }}`, computed `focusedService` getter, `enterFocusMode()`, `switchFocusedService()`, `confirmFocusSelection()`, `handleCarouselScroll()`, `scrollToCard()`, `scrollCarousel()` methods
   - Service model fields: `image_filename`, `best_for`, `pressure_level` (added via migration)
 - **CSRF**: Flask-WTF CSRFProtect (form tokens + X-CSRFToken header for AJAX)
 - **Rate Limiting**: Flask-Limiter (in-memory, 60/min global; 5/min login; 5/min+30/hr booking; 10/min coupon validation)
@@ -28,6 +29,7 @@ A Flask-based booking and management system for HoPono Massage, a massage therap
 - **Probe Blocker**: WordPress/CMS/PHP paths blocked at `before_request` level; custom 403 page
 - **HTML Sanitization**: Devtools messaging strips script/iframe/event handler tags before sending emails
 - **Proxy Support**: ProxyFix middleware for real client IP behind reverse proxies
+- **Reminder Scheduler**: APScheduler (BackgroundScheduler) runs every 15 minutes, uses Cyprus timezone (Europe/Nicosia) for all time calculations, initialized in `create_app()` with double-init guard
 - **GDPR Compliance**: Marketing consent checkbox (optional, separate from required data processing consent), privacy policy page at `/privacy`, consent status visible in admin client detail
 - **Privacy Policy**: 12-section policy covering data controller, data collected, purpose, legal basis (Art. 6), marketing consent, retention (24mo), client rights, third parties (Brevo/Send.to), cookies, security, changes, complaints (Cyprus DPA)
 

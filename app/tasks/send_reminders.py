@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timedelta
+import pytz
 from app.extensions import db
 from app.models.booking import Booking
 from app.models.reminder_log import ReminderLog
@@ -13,14 +14,11 @@ from app.services.reminder_service import (
 
 logger = logging.getLogger(__name__)
 
+CYPRUS_TZ = pytz.timezone("Europe/Nicosia")
+
 
 def check_and_send_reminders(app):
-    """
-    Check for upcoming bookings that need reminders sent.
-    This runs every 15 minutes via APScheduler.
-    """
     with app.app_context():
-        # Get reminder timing from settings
         setting = db.session.get(Setting, "reminder_hours_before")
         hours_before = int(setting.value) if setting else 24
 
@@ -30,31 +28,54 @@ def check_and_send_reminders(app):
         email_setting = db.session.get(Setting, "email_enabled")
         email_enabled = email_setting.value.lower() == "true" if email_setting else True
 
-        now = datetime.utcnow()
-        target = now + timedelta(hours=hours_before)
+        now_cyprus = datetime.now(CYPRUS_TZ).replace(tzinfo=None)
+        target = now_cyprus + timedelta(hours=hours_before)
 
-        # Find bookings that need reminders
+        logger.info(
+            "Reminder check running. Cyprus time: %s, target window end: %s, sms_enabled=%s, email_enabled=%s",
+            now_cyprus.strftime("%Y-%m-%d %H:%M:%S"),
+            target.strftime("%Y-%m-%d %H:%M:%S"),
+            sms_enabled,
+            email_enabled,
+        )
+
+        window_end = target + timedelta(minutes=15)
+        dates_to_check = {now_cyprus.date(), target.date(), window_end.date()}
+
         bookings = (
             Booking.query.filter(
                 Booking.status == "confirmed",
-                Booking.date == target.date(),
+                Booking.date.in_(list(dates_to_check)),
             )
             .all()
         )
 
+        logger.info(
+            "Found %d confirmed bookings on %s",
+            len(bookings),
+            ", ".join(d.isoformat() for d in sorted(dates_to_check)),
+        )
+
+        sent_count = 0
         for booking in bookings:
             booking_dt = datetime.combine(booking.date, booking.start_time)
 
-            # Only send if within the reminder window
-            if not (now < booking_dt <= target + timedelta(minutes=15)):
+            if not (now_cyprus < booking_dt <= target + timedelta(minutes=15)):
+                logger.debug(
+                    "Booking #%d at %s outside reminder window (%s to %s), skipping",
+                    booking.id,
+                    booking_dt.strftime("%Y-%m-%d %H:%M"),
+                    now_cyprus.strftime("%H:%M"),
+                    (target + timedelta(minutes=15)).strftime("%H:%M"),
+                )
                 continue
 
-            # Check if reminder already sent
             existing = ReminderLog.query.filter(
                 ReminderLog.booking_id == booking.id,
                 ReminderLog.status == "sent",
             ).first()
             if existing:
+                logger.debug("Booking #%d already has a sent reminder, skipping", booking.id)
                 continue
 
             client = booking.client
@@ -62,22 +83,33 @@ def check_and_send_reminders(app):
             time_str = booking.start_time.strftime("%H:%M")
             date_str = booking.date.strftime("%B %d, %Y")
 
-            # Send SMS
+            logger.info(
+                "Processing reminder for booking #%d: %s, %s at %s, preference=%s",
+                booking.id,
+                client.name,
+                service.name,
+                time_str,
+                client.reminder_preference,
+            )
+
             if sms_enabled and client.reminder_preference == "phone":
                 sms_text = build_reminder_sms(client.name, service.name, time_str)
+                logger.info("Sending SMS to %s for booking #%d", client.phone, booking.id)
                 success = send_sms(client.phone, sms_text)
                 log = ReminderLog(
                     booking_id=booking.id,
                     type="sms",
                     status="sent" if success else "failed",
-                    sent_at=datetime.utcnow() if success else None,
+                    sent_at=datetime.now(CYPRUS_TZ).replace(tzinfo=None) if success else None,
                     error_message=None if success else "SMS send failed",
                 )
                 db.session.add(log)
+                sent_count += 1
+                logger.info("SMS for booking #%d: %s", booking.id, "sent" if success else "FAILED")
 
-            # Send email
             if email_enabled and client.reminder_preference == "email":
                 html = build_reminder_email(client.name, service.name, date_str, time_str)
+                logger.info("Sending email to %s for booking #%d", client.email, booking.id)
                 success = send_email(
                     client.email,
                     f"Reminder: Your HoPono appointment on {date_str}",
@@ -87,10 +119,12 @@ def check_and_send_reminders(app):
                     booking_id=booking.id,
                     type="email",
                     status="sent" if success else "failed",
-                    sent_at=datetime.utcnow() if success else None,
+                    sent_at=datetime.now(CYPRUS_TZ).replace(tzinfo=None) if success else None,
                     error_message=None if success else "Email send failed",
                 )
                 db.session.add(log)
+                sent_count += 1
+                logger.info("Email for booking #%d: %s", booking.id, "sent" if success else "FAILED")
 
         db.session.commit()
-        logger.info("Reminder check completed. Processed %d bookings.", len(bookings))
+        logger.info("Reminder check completed. Processed %d bookings, sent %d reminders.", len(bookings), sent_count)

@@ -90,4 +90,8 @@ def create_app(config_name=None):
     # Import models so they're registered with SQLAlchemy
     from . import models  # noqa: F401
 
+    if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        from .tasks.scheduler import init_scheduler
+        init_scheduler(app)
+
     return app
