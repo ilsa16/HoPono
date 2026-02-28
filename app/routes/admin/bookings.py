@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, Response
 from flask_login import login_required
 from app.extensions import db
 from app.models.booking import Booking
@@ -11,9 +11,7 @@ from app.services.slot_engine import get_available_slots
 admin_bookings_bp = Blueprint("admin_bookings", __name__)
 
 
-@admin_bookings_bp.route("/")
-@login_required
-def list_bookings():
+def _filtered_bookings_query():
     status_filter = request.args.get("status")
     date_from = request.args.get("date_from")
     date_to = request.args.get("date_to")
@@ -36,8 +34,106 @@ def list_bookings():
             )
         )
 
-    bookings = query.order_by(Booking.date.desc(), Booking.start_time.desc()).all()
+    return query.order_by(Booking.date.desc(), Booking.start_time.desc())
+
+
+@admin_bookings_bp.route("/")
+@login_required
+def list_bookings():
+    bookings = _filtered_bookings_query().all()
     return render_template("admin/bookings.html", bookings=bookings)
+
+
+@admin_bookings_bp.route("/export.ics")
+@login_required
+def export_ics():
+    bookings = _filtered_bookings_query().all()
+
+    lines = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//HoPono Massage//Booking Export//EN",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        "X-WR-TIMEZONE:Europe/Nicosia",
+        "BEGIN:VTIMEZONE",
+        "TZID:Europe/Nicosia",
+        "BEGIN:STANDARD",
+        "DTSTART:19701025T040000",
+        "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10",
+        "TZOFFSETFROM:+0300",
+        "TZOFFSETTO:+0200",
+        "TZNAME:EET",
+        "END:STANDARD",
+        "BEGIN:DAYLIGHT",
+        "DTSTART:19700329T030000",
+        "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3",
+        "TZOFFSETFROM:+0200",
+        "TZOFFSETTO:+0300",
+        "TZNAME:EEST",
+        "END:DAYLIGHT",
+        "END:VTIMEZONE",
+    ]
+
+    for b in bookings:
+        client = b.client
+        service = b.service
+        dt_start = f"{b.date.strftime('%Y%m%d')}T{b.start_time.strftime('%H%M%S')}"
+        dt_end = f"{b.date.strftime('%Y%m%d')}T{b.end_time.strftime('%H%M%S')}"
+        summary = _ics_escape(f"HoPono: {service.name} - {client.name}")
+        description = _ics_escape(
+            f"Client: {client.name}\\n"
+            f"Phone: {client.phone or 'N/A'}\\n"
+            f"Email: {client.email or 'N/A'}\\n"
+            f"Service: {service.name} ({service.duration_minutes}min)\\n"
+            f"Price: €{service.price_eur:.2f}\\n"
+            f"Status: {b.status.capitalize()}"
+        )
+        uid = f"hopono-booking-{b.id}@hopono.com"
+
+        dtstamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+        lines.extend([
+            "BEGIN:VEVENT",
+            f"UID:{uid}",
+            f"DTSTAMP:{dtstamp}",
+            f"DTSTART;TZID=Europe/Nicosia:{dt_start}",
+            f"DTEND;TZID=Europe/Nicosia:{dt_end}",
+            _ics_fold(f"SUMMARY:{summary}"),
+            _ics_fold(f"DESCRIPTION:{description}"),
+            _ics_fold(f"LOCATION:HoPono Massage Studio\\, Nicosia\\, Cyprus"),
+            "STATUS:CONFIRMED",
+            "END:VEVENT",
+        ])
+
+    lines.append("END:VCALENDAR")
+
+    ics_content = "\r\n".join(lines) + "\r\n"
+
+    return Response(
+        ics_content,
+        mimetype="text/calendar",
+        headers={"Content-Disposition": "attachment; filename=hopono_bookings.ics"},
+    )
+
+
+def _ics_escape(text):
+    text = text.replace("\\", "\\\\")
+    text = text.replace(",", "\\,")
+    text = text.replace(";", "\\;")
+    return text
+
+
+def _ics_fold(line):
+    result = []
+    while len(line.encode("utf-8")) > 75:
+        cut = 75
+        while len(line[:cut].encode("utf-8")) > 75:
+            cut -= 1
+        result.append(line[:cut])
+        line = " " + line[cut:]
+    result.append(line)
+    return "\r\n".join(result)
 
 
 @admin_bookings_bp.route("/<int:booking_id>")

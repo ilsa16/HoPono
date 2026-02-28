@@ -34,10 +34,17 @@
             Filter
         </button>
     </form>
-    <a href="{{ url_for('admin_bookings.new_booking') }}"
-       class="ml-auto bg-hopono-gold text-hopono-blue-deeper px-4 py-2 rounded-lg text-sm font-semibold hover:bg-hopono-gold-light transition">
-        + New Booking
-    </a>
+    <div class="ml-auto flex gap-2">
+        <a href="{{ url_for('admin_bookings.export_ics', status=request.args.get('status', ''), date_from=request.args.get('date_from', ''), date_to=request.args.get('date_to', ''), search=request.args.get('search', '')) }}"
+           class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            Export to Calendar
+        </a>
+        <a href="{{ url_for('admin_bookings.new_booking') }}"
+           class="bg-hopono-gold text-hopono-blue-deeper px-4 py-2 rounded-lg text-sm font-semibold hover:bg-hopono-gold-light transition">
+            + New Booking
+        </a>
+    </div>
 </div>
 
 <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
