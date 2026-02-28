@@ -23,3 +23,9 @@ def init_scheduler(app):
     )
     scheduler.start()
     logger.info("Reminder scheduler started — checking every 15 minutes")
+
+    try:
+        logger.info("Running initial reminder check on startup")
+        check_and_send_reminders(app)
+    except Exception as e:
+        logger.error("Initial reminder check failed: %s", e)
