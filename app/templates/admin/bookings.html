@@ -27,7 +27,7 @@
         </div>
         <div>
             <label class="block text-xs text-gray-500 mb-1">Search</label>
-            <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Client name or email"
+            <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Name, email or phone"
                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
         </div>
         <button type="submit" class="bg-hopono-blue text-white px-4 py-2 rounded-lg text-sm hover:bg-hopono-blue-dark transition">
@@ -47,6 +47,7 @@
                 <th class="px-4 py-3 text-left font-medium">Date</th>
                 <th class="px-4 py-3 text-left font-medium">Time</th>
                 <th class="px-4 py-3 text-left font-medium">Client</th>
+                <th class="px-4 py-3 text-left font-medium">Phone</th>
                 <th class="px-4 py-3 text-left font-medium">Service</th>
                 <th class="px-4 py-3 text-left font-medium">Source</th>
                 <th class="px-4 py-3 text-left font-medium">Status</th>
@@ -59,6 +60,7 @@
                 <td class="px-4 py-3 font-medium">{{ booking.date.strftime('%d %b %Y') }}</td>
                 <td class="px-4 py-3">{{ booking.start_time.strftime('%H:%M') }}</td>
                 <td class="px-4 py-3">{{ booking.client.name }}</td>
+                <td class="px-4 py-3 text-gray-400 text-xs">{{ booking.client.phone or '—' }}</td>
                 <td class="px-4 py-3 text-gray-500">{{ booking.service.name }}</td>
                 <td class="px-4 py-3">
                     <span class="text-xs px-2 py-0.5 rounded-full {{ 'bg-blue-50 text-blue-600' if booking.source == 'online' else 'bg-orange-50 text-orange-600' }}">

@@ -126,6 +126,20 @@
     </div>
     {% endif %}
 
+    <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+        <h3 class="font-semibold text-gray-800 mb-4">Export</h3>
+        {% set gcal_title = "HoPono: " ~ booking.service.name ~ " - " ~ booking.client.name %}
+        {% set gcal_start = booking.date.strftime('%Y%m%d') ~ "T" ~ booking.start_time.strftime('%H%M%S') %}
+        {% set gcal_end = booking.date.strftime('%Y%m%d') ~ "T" ~ booking.end_time.strftime('%H%M%S') %}
+        {% set gcal_details = "Client: " ~ booking.client.name ~ "\nPhone: " ~ (booking.client.phone or 'N/A') ~ "\nEmail: " ~ (booking.client.email or 'N/A') ~ "\nService: " ~ booking.service.name ~ " (" ~ booking.service.duration_minutes|string ~ "min)\nPrice: €" ~ "%.2f"|format(booking.service.price_eur) %}
+        <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={{ gcal_title|urlencode }}&dates={{ gcal_start }}/{{ gcal_end }}&ctz=Europe/Nicosia&details={{ gcal_details|urlencode }}&location={{ 'HoPono Massage Studio, Nicosia, Cyprus'|urlencode }}"
+           target="_blank" rel="noopener"
+           class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            Add to Google Calendar
+        </a>
+    </div>
+
     <a href="{{ url_for('admin_bookings.list_bookings') }}" class="text-hopono-blue hover:underline text-sm">&larr; Back to bookings</a>
 </div>
 {% endblock %}
