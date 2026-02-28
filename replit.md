@@ -29,7 +29,8 @@ A Flask-based booking and management system for HoPono Massage, a massage therap
 - **Probe Blocker**: WordPress/CMS/PHP paths blocked at `before_request` level; custom 403 page
 - **HTML Sanitization**: Devtools messaging strips script/iframe/event handler tags before sending emails
 - **Proxy Support**: ProxyFix middleware for real client IP behind reverse proxies
-- **Reminder Scheduler**: APScheduler (BackgroundScheduler) runs every 15 minutes, uses Cyprus timezone (Europe/Nicosia) for all time calculations, initialized in `create_app()` with double-init guard
+- **Reminder Scheduler**: APScheduler (BackgroundScheduler) runs every 15 minutes, uses Cyprus timezone (Europe/Nicosia) for all time calculations, initialized in `create_app()` with double-init guard. Fallback logic: if preferred channel (SMS/email) fails or is disabled, automatically attempts the other channel.
+- **Admin Calendar**: Bookings page has List/Calendar toggle. Calendar supports Day, Week, and Month views (all mobile-friendly). Week view uses horizontal scroll on mobile. Month view shows colored dots (mobile) or event previews (desktop) with drill-down to day view.
 - **GDPR Compliance**: Marketing consent checkbox (optional, separate from required data processing consent), privacy policy page at `/privacy`, consent status visible in admin client detail
 - **Privacy Policy**: 12-section policy covering data controller, data collected, purpose, legal basis (Art. 6), marketing consent, retention (24mo), client rights, third parties (Brevo/Send.to), cookies, security, changes, complaints (Cyprus DPA)
 

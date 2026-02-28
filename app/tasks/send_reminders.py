@@ -17,6 +17,76 @@ logger = logging.getLogger(__name__)
 CYPRUS_TZ = pytz.timezone("Europe/Nicosia")
 
 
+def _log_reminder(booking_id, rtype, success, error_msg=None):
+    log = ReminderLog(
+        booking_id=booking_id,
+        type=rtype,
+        status="sent" if success else "failed",
+        sent_at=datetime.now(CYPRUS_TZ).replace(tzinfo=None) if success else None,
+        error_message=None if success else (error_msg or f"{rtype} send failed"),
+    )
+    db.session.add(log)
+    return log
+
+
+def _try_sms(booking, client, service, time_str):
+    sms_text = build_reminder_sms(client.name, service.name, time_str)
+    logger.info("Sending SMS to %s for booking #%d", client.phone, booking.id)
+    success = send_sms(client.phone, sms_text)
+    _log_reminder(booking.id, "sms", success)
+    logger.info("SMS for booking #%d: %s", booking.id, "sent" if success else "FAILED")
+    return success
+
+
+def _try_email(booking, client, service, time_str, date_str):
+    html = build_reminder_email(client.name, service.name, date_str, time_str)
+    logger.info("Sending email to %s for booking #%d", client.email, booking.id)
+    success = send_email(
+        client.email,
+        f"Reminder: Your HoPono appointment on {date_str}",
+        html,
+    )
+    _log_reminder(booking.id, "email", success)
+    logger.info("Email for booking #%d: %s", booking.id, "sent" if success else "FAILED")
+    return success
+
+
+def _attempt_reminder(booking, client, service, time_str, date_str,
+                      sms_enabled, email_enabled):
+    pref = client.reminder_preference
+    can_sms = sms_enabled and bool(client.phone)
+    can_email = email_enabled and bool(client.email)
+
+    if pref == "phone":
+        if can_sms:
+            if _try_sms(booking, client, service, time_str):
+                return True
+            logger.info("SMS failed for booking #%d, trying email fallback", booking.id)
+        else:
+            logger.info("SMS unavailable for booking #%d (enabled=%s, phone=%s), trying email",
+                        booking.id, sms_enabled, bool(client.phone))
+        if can_email:
+            return _try_email(booking, client, service, time_str, date_str)
+    elif pref == "email":
+        if can_email:
+            if _try_email(booking, client, service, time_str, date_str):
+                return True
+            logger.info("Email failed for booking #%d, trying SMS fallback", booking.id)
+        else:
+            logger.info("Email unavailable for booking #%d (enabled=%s, email=%s), trying SMS",
+                        booking.id, email_enabled, bool(client.email))
+        if can_sms:
+            return _try_sms(booking, client, service, time_str)
+    else:
+        if can_email:
+            return _try_email(booking, client, service, time_str, date_str)
+        if can_sms:
+            return _try_sms(booking, client, service, time_str)
+
+    logger.warning("No channel available to send reminder for booking #%d", booking.id)
+    return False
+
+
 def check_and_send_reminders(app):
     with app.app_context():
         setting = db.session.get(Setting, "reminder_hours_before")
@@ -92,39 +162,12 @@ def check_and_send_reminders(app):
                 client.reminder_preference,
             )
 
-            if sms_enabled and client.reminder_preference == "phone":
-                sms_text = build_reminder_sms(client.name, service.name, time_str)
-                logger.info("Sending SMS to %s for booking #%d", client.phone, booking.id)
-                success = send_sms(client.phone, sms_text)
-                log = ReminderLog(
-                    booking_id=booking.id,
-                    type="sms",
-                    status="sent" if success else "failed",
-                    sent_at=datetime.now(CYPRUS_TZ).replace(tzinfo=None) if success else None,
-                    error_message=None if success else "SMS send failed",
-                )
-                db.session.add(log)
+            success = _attempt_reminder(
+                booking, client, service, time_str, date_str,
+                sms_enabled, email_enabled,
+            )
+            if success:
                 sent_count += 1
-                logger.info("SMS for booking #%d: %s", booking.id, "sent" if success else "FAILED")
-
-            if email_enabled and client.reminder_preference == "email":
-                html = build_reminder_email(client.name, service.name, date_str, time_str)
-                logger.info("Sending email to %s for booking #%d", client.email, booking.id)
-                success = send_email(
-                    client.email,
-                    f"Reminder: Your HoPono appointment on {date_str}",
-                    html,
-                )
-                log = ReminderLog(
-                    booking_id=booking.id,
-                    type="email",
-                    status="sent" if success else "failed",
-                    sent_at=datetime.now(CYPRUS_TZ).replace(tzinfo=None) if success else None,
-                    error_message=None if success else "Email send failed",
-                )
-                db.session.add(log)
-                sent_count += 1
-                logger.info("Email for booking #%d: %s", booking.id, "sent" if success else "FAILED")
 
         db.session.commit()
         logger.info("Reminder check completed. Processed %d bookings, sent %d reminders.", len(bookings), sent_count)

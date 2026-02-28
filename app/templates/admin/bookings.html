@@ -125,88 +125,155 @@
     <div x-show="viewMode === 'calendar'" x-cloak>
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <!-- Calendar Header -->
-            <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between gap-2 flex-wrap">
-                <div class="flex items-center gap-2">
-                    <button @click="goToToday()" class="px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+            <div class="px-3 sm:px-4 py-3 border-b border-gray-200 flex items-center justify-between gap-2 flex-wrap">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <button @click="goToToday()" class="px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition">
                         Today
                     </button>
                     <button @click="navigate(-1)" class="p-1.5 rounded-lg hover:bg-gray-100 transition" aria-label="Previous">
-                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                     </button>
                     <button @click="navigate(1)" class="p-1.5 rounded-lg hover:bg-gray-100 transition" aria-label="Next">
-                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </button>
-                    <h2 class="text-base sm:text-lg font-semibold text-gray-800 ml-1" x-text="headerLabel"></h2>
+                    <h2 class="text-sm sm:text-lg font-semibold text-gray-800 ml-0.5 sm:ml-1" x-text="headerLabel"></h2>
                 </div>
-                <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
-                    <button @click="setCalendarMode('day')" :class="calendarMode === 'day' ? 'bg-white shadow-sm' : ''" class="px-3 py-1 text-sm rounded-md transition">Day</button>
-                    <button @click="setCalendarMode('week')" :class="calendarMode === 'week' ? 'bg-white shadow-sm' : ''" class="px-3 py-1 text-sm rounded-md transition">Week</button>
+                <div class="flex items-center gap-0.5 bg-gray-100 rounded-lg p-0.5">
+                    <button @click="setCalendarMode('day')" :class="calendarMode === 'day' ? 'bg-white shadow-sm' : ''" class="px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-md transition">Day</button>
+                    <button @click="setCalendarMode('week')" :class="calendarMode === 'week' ? 'bg-white shadow-sm' : ''" class="px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-md transition">Week</button>
+                    <button @click="setCalendarMode('month')" :class="calendarMode === 'month' ? 'bg-white shadow-sm' : ''" class="px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-md transition">Month</button>
                 </div>
             </div>
 
-            <!-- Time Grid -->
-            <div class="relative overflow-x-auto" style="max-height: calc(100vh - 240px);" x-ref="calendarScroll">
-                <!-- Day Headers -->
-                <div class="sticky top-0 z-20 bg-white border-b border-gray-200">
-                    <div class="flex">
-                        <div class="w-14 sm:w-16 flex-shrink-0"></div>
-                        <template x-for="day in visibleDays" :key="day.dateStr">
-                            <div class="flex-1 min-w-[100px] text-center py-2 border-l border-gray-100"
-                                 :class="day.isToday ? 'bg-blue-50/50' : ''">
-                                <div class="text-xs text-gray-500 uppercase" x-text="day.dayName"></div>
-                                <div class="text-sm font-semibold mt-0.5"
-                                     :class="day.isToday ? 'bg-hopono-blue text-white w-7 h-7 rounded-full flex items-center justify-center mx-auto' : 'text-gray-800'"
-                                     x-text="day.dayNum"></div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Grid Body -->
-                <div class="flex relative" x-ref="gridBody">
-                    <!-- Time Labels -->
-                    <div class="w-14 sm:w-16 flex-shrink-0">
-                        <template x-for="hour in hours" :key="hour">
-                            <div class="h-16 relative">
-                                <span class="absolute -top-2 right-2 text-[10px] sm:text-xs text-gray-400" x-text="formatHourLabel(hour)"></span>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- Day Columns -->
-                    <template x-for="day in visibleDays" :key="day.dateStr">
-                        <div class="flex-1 min-w-[100px] relative border-l border-gray-100"
-                             :class="day.isToday ? 'bg-blue-50/30' : ''">
-                            <template x-for="hour in hours" :key="hour">
-                                <div class="h-16 border-b border-gray-50 relative">
-                                    <div class="absolute top-0 left-0 right-0 h-px bg-gray-200" x-show="hour !== hours[0]"></div>
-                                    <div class="absolute top-8 left-0 right-0 h-px bg-gray-100 opacity-50"></div>
+            <!-- DAY / WEEK TIME GRID -->
+            <div x-show="calendarMode !== 'month'">
+                <div class="relative overflow-auto" style="max-height: calc(100vh - 240px);" x-ref="calendarScroll">
+                    <!-- Day Headers -->
+                    <div class="sticky top-0 z-20 bg-white border-b border-gray-200">
+                        <div class="flex" :style="calendarMode === 'week' ? 'min-width: 600px' : ''">
+                            <div class="w-12 sm:w-16 flex-shrink-0"></div>
+                            <template x-for="day in visibleDays" :key="day.dateStr">
+                                <div class="flex-1 text-center py-2 border-l border-gray-100"
+                                     :class="day.isToday ? 'bg-blue-50/50' : ''"
+                                     :style="calendarMode === 'week' ? 'min-width: 80px' : ''">
+                                    <div class="text-[10px] sm:text-xs text-gray-500 uppercase" x-text="day.dayName"></div>
+                                    <div class="text-xs sm:text-sm font-semibold mt-0.5"
+                                         :class="day.isToday ? 'bg-hopono-blue text-white w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center mx-auto text-[11px] sm:text-sm' : 'text-gray-800'"
+                                         x-text="day.dayNum"></div>
                                 </div>
-                            </template>
-
-                            <!-- Current time indicator -->
-                            <template x-if="day.isToday && currentTimeTop !== null">
-                                <div class="absolute left-0 right-0 z-10 pointer-events-none" :style="'top:' + currentTimeTop + 'px'">
-                                    <div class="flex items-center">
-                                        <div class="w-2.5 h-2.5 bg-red-500 rounded-full -ml-1"></div>
-                                        <div class="flex-1 h-0.5 bg-red-500"></div>
-                                    </div>
-                                </div>
-                            </template>
-
-                            <!-- Events -->
-                            <template x-for="evt in getEventsForDay(day.dateStr)" :key="evt.id">
-                                <button class="absolute left-0.5 right-0.5 sm:left-1 sm:right-1 rounded-md px-1.5 py-1 cursor-pointer overflow-hidden border border-white/20 hover:brightness-95 transition text-left focus:outline-none focus:ring-2 focus:ring-hopono-blue focus:ring-offset-1"
-                                     :style="getEventStyle(evt)"
-                                     @click="goToBooking(evt.id)"
-                                     :aria-label="evt.title + ' — ' + evt.service + ' at ' + evt.start">
-                                    <div class="text-[10px] sm:text-xs font-semibold text-white truncate" x-text="evt.title"></div>
-                                    <div class="text-[9px] sm:text-[10px] text-white/80 truncate" x-text="evt.start + ' – ' + evt.end"></div>
-                                    <div class="text-[9px] sm:text-[10px] text-white/70 truncate hidden sm:block" x-text="evt.service"></div>
-                                </button>
                             </template>
                         </div>
-                    </template>
+                    </div>
+
+                    <!-- Grid Body -->
+                    <div class="flex relative" x-ref="gridBody" :style="calendarMode === 'week' ? 'min-width: 600px' : ''">
+                        <!-- Time Labels -->
+                        <div class="w-12 sm:w-16 flex-shrink-0">
+                            <template x-for="hour in hours" :key="hour">
+                                <div class="h-14 sm:h-16 relative">
+                                    <span class="absolute -top-2 right-1 sm:right-2 text-[9px] sm:text-xs text-gray-400" x-text="formatHourLabel(hour)"></span>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Day Columns -->
+                        <template x-for="day in visibleDays" :key="day.dateStr">
+                            <div class="flex-1 relative border-l border-gray-100"
+                                 :class="day.isToday ? 'bg-blue-50/30' : ''"
+                                 :style="calendarMode === 'week' ? 'min-width: 80px' : ''">
+                                <template x-for="hour in hours" :key="hour">
+                                    <div class="h-14 sm:h-16 border-b border-gray-50 relative">
+                                        <div class="absolute top-0 left-0 right-0 h-px bg-gray-200" x-show="hour !== hours[0]"></div>
+                                        <div class="absolute top-7 sm:top-8 left-0 right-0 h-px bg-gray-100 opacity-50"></div>
+                                    </div>
+                                </template>
+
+                                <!-- Current time indicator -->
+                                <template x-if="day.isToday && currentTimeTop !== null">
+                                    <div class="absolute left-0 right-0 z-10 pointer-events-none" :style="'top:' + currentTimeTop + 'px'">
+                                        <div class="flex items-center">
+                                            <div class="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-red-500 rounded-full -ml-1"></div>
+                                            <div class="flex-1 h-0.5 bg-red-500"></div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Events -->
+                                <template x-for="evt in getEventsForDay(day.dateStr)" :key="evt.id">
+                                    <button class="absolute left-0.5 right-0.5 rounded-md px-1 sm:px-1.5 py-0.5 sm:py-1 cursor-pointer overflow-hidden border border-white/20 hover:brightness-95 transition text-left focus:outline-none focus:ring-2 focus:ring-hopono-blue focus:ring-offset-1"
+                                         :style="getEventStyle(evt)"
+                                         @click="goToBooking(evt.id)"
+                                         :aria-label="evt.title + ' — ' + evt.service + ' at ' + evt.start">
+                                        <div class="text-[9px] sm:text-xs font-semibold text-white truncate" x-text="evt.title"></div>
+                                        <div class="text-[8px] sm:text-[10px] text-white/80 truncate" x-text="evt.start + '–' + evt.end"></div>
+                                        <div class="text-[8px] sm:text-[10px] text-white/70 truncate hidden sm:block" x-text="evt.service"></div>
+                                    </button>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Loading overlay -->
+                    <div x-show="loading" class="absolute inset-0 bg-white/60 flex items-center justify-center z-30">
+                        <div class="flex items-center gap-2 text-gray-500 text-sm">
+                            <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            Loading...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONTH VIEW -->
+            <div x-show="calendarMode === 'month'" class="relative">
+                <!-- Month Grid -->
+                <div class="p-2 sm:p-4">
+                    <!-- Weekday Headers -->
+                    <div class="grid grid-cols-7 mb-1">
+                        <template x-for="dn in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']" :key="dn">
+                            <div class="text-center text-[10px] sm:text-xs text-gray-500 font-medium py-1" x-text="dn"></div>
+                        </template>
+                    </div>
+                    <!-- Day Cells -->
+                    <div class="grid grid-cols-7 border-t border-l border-gray-200">
+                        <template x-for="cell in monthCells" :key="cell.key">
+                            <button
+                                class="border-r border-b border-gray-200 p-1 sm:p-2 text-left transition focus:outline-none focus:ring-2 focus:ring-inset focus:ring-hopono-blue"
+                                :class="{
+                                    'bg-blue-50': cell.isToday,
+                                    'bg-white hover:bg-gray-50': cell.inMonth && !cell.isToday,
+                                    'bg-gray-50/50 text-gray-300': !cell.inMonth,
+                                    'cursor-pointer': cell.inMonth,
+                                    'cursor-default': !cell.inMonth
+                                }"
+                                :style="'min-height: ' + (window.innerWidth < 640 ? '52px' : '80px')"
+                                @click="cell.inMonth && drillToDay(cell.dateStr)"
+                                :aria-label="cell.dateStr + (cell.count ? ', ' + cell.count + ' bookings' : '')">
+                                <div class="text-xs sm:text-sm font-medium"
+                                     :class="cell.isToday ? 'bg-hopono-blue text-white w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs' : (cell.inMonth ? 'text-gray-800' : 'text-gray-300')"
+                                     x-text="cell.dayNum"></div>
+                                <!-- Event dots on mobile, event previews on desktop -->
+                                <template x-if="cell.count > 0">
+                                    <div>
+                                        <div class="sm:hidden flex gap-0.5 mt-1 flex-wrap">
+                                            <template x-for="dot in cell.dots.slice(0, 4)" :key="dot.id">
+                                                <span class="w-1.5 h-1.5 rounded-full" :style="'background:' + dot.color"></span>
+                                            </template>
+                                            <span x-show="cell.count > 4" class="text-[8px] text-gray-400" x-text="'+' + (cell.count - 4)"></span>
+                                        </div>
+                                        <div class="hidden sm:block mt-1 space-y-0.5">
+                                            <template x-for="evt in cell.events.slice(0, 3)" :key="evt.id">
+                                                <div class="text-[10px] leading-tight rounded px-1 py-0.5 text-white truncate" :style="'background:' + evt.color" x-text="evt.start + ' ' + evt.title"></div>
+                                            </template>
+                                            <div x-show="cell.count > 3" class="text-[10px] text-gray-400 px-1" x-text="'+' + (cell.count - 3) + ' more'"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </button>
+                        </template>
+                    </div>
                 </div>
 
                 <!-- Loading overlay -->
@@ -282,7 +349,7 @@ function bookingsPage() {
                 const d = new Date(this.currentDate);
                 d.setHours(0, 0, 0, 0);
                 days.push(this._makeDayObj(d, today));
-            } else {
+            } else if (this.calendarMode === 'week') {
                 const start = this._weekStart(this.currentDate);
                 for (let i = 0; i < 7; i++) {
                     const d = new Date(start);
@@ -293,7 +360,49 @@ function bookingsPage() {
             return days;
         },
 
+        get monthCells() {
+            const cells = [];
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const year = this.currentDate.getFullYear();
+            const month = this.currentDate.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+
+            let startDow = firstDay.getDay();
+            startDow = startDow === 0 ? 6 : startDow - 1;
+
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - startDow);
+
+            const totalCells = Math.ceil((startDow + lastDay.getDate()) / 7) * 7;
+
+            for (let i = 0; i < totalCells; i++) {
+                const d = new Date(startDate);
+                d.setDate(d.getDate() + i);
+                d.setHours(0, 0, 0, 0);
+                const dateStr = this._toISO(d);
+                const inMonth = d.getMonth() === month;
+                const dayEvents = this.events.filter(e => e.date === dateStr);
+                cells.push({
+                    key: dateStr,
+                    dateStr: dateStr,
+                    dayNum: d.getDate(),
+                    inMonth: inMonth,
+                    isToday: d.getTime() === today.getTime(),
+                    count: dayEvents.length,
+                    events: dayEvents,
+                    dots: dayEvents.map(e => ({ id: e.id, color: e.color })),
+                });
+            }
+            return cells;
+        },
+
         get headerLabel() {
+            if (this.calendarMode === 'month') {
+                return this.currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            }
             if (this.calendarMode === 'day') {
                 return this.currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
             }
@@ -343,8 +452,10 @@ function bookingsPage() {
             const d = new Date(this.currentDate);
             if (this.calendarMode === 'day') {
                 d.setDate(d.getDate() + dir);
-            } else {
+            } else if (this.calendarMode === 'week') {
                 d.setDate(d.getDate() + dir * 7);
+            } else {
+                d.setMonth(d.getMonth() + dir);
             }
             this.currentDate = d;
         },
@@ -352,6 +463,12 @@ function bookingsPage() {
         goToToday() {
             this.currentDate = new Date();
             this.$nextTick(() => this.scrollToCurrentTime());
+        },
+
+        drillToDay(dateStr) {
+            const [y, m, d] = dateStr.split('-').map(Number);
+            this.currentDate = new Date(y, m - 1, d);
+            this.calendarMode = 'day';
         },
 
         scrollToCurrentTime() {
@@ -366,8 +483,9 @@ function bookingsPage() {
             const m = now.getMinutes();
             const startHour = this.hours[0];
             const endHour = this.hours[this.hours.length - 1] + 1;
+            const pxPerHour = window.innerWidth < 640 ? 56 : 64;
             if (h >= startHour && h < endHour) {
-                this.currentTimeTop = (h - startHour) * 64 + (m / 60) * 64;
+                this.currentTimeTop = (h - startHour) * pxPerHour + (m / 60) * pxPerHour;
             } else {
                 this.currentTimeTop = null;
             }
@@ -383,12 +501,26 @@ function bookingsPage() {
             if (this.calendarMode === 'day') {
                 startDate = this._toISO(this.currentDate);
                 endDate = startDate;
-            } else {
+            } else if (this.calendarMode === 'week') {
                 const ws = this._weekStart(this.currentDate);
                 const we = new Date(ws);
                 we.setDate(we.getDate() + 6);
                 startDate = this._toISO(ws);
                 endDate = this._toISO(we);
+            } else {
+                const year = this.currentDate.getFullYear();
+                const month = this.currentDate.getMonth();
+                const first = new Date(year, month, 1);
+                let startDow = first.getDay();
+                startDow = startDow === 0 ? 6 : startDow - 1;
+                const gridStart = new Date(first);
+                gridStart.setDate(gridStart.getDate() - startDow);
+                const last = new Date(year, month + 1, 0);
+                const totalCells = Math.ceil((startDow + last.getDate()) / 7) * 7;
+                const gridEnd = new Date(gridStart);
+                gridEnd.setDate(gridEnd.getDate() + totalCells - 1);
+                startDate = this._toISO(gridStart);
+                endDate = this._toISO(gridEnd);
             }
 
             try {
@@ -400,7 +532,9 @@ function bookingsPage() {
             }
             this.loading = false;
 
-            this.$nextTick(() => this.scrollToCurrentTime());
+            if (this.calendarMode !== 'month') {
+                this.$nextTick(() => this.scrollToCurrentTime());
+            }
         },
 
         getEventsForDay(dateStr) {
@@ -410,14 +544,15 @@ function bookingsPage() {
         getEventStyle(evt) {
             const startHour = this.hours[0];
             const endHour = this.hours[this.hours.length - 1] + 1;
-            const totalHeight = (endHour - startHour) * 64;
+            const pxPerHour = window.innerWidth < 640 ? 56 : 64;
+            const totalHeight = (endHour - startHour) * pxPerHour;
             const [sh, sm] = evt.start.split(':').map(Number);
             const [eh, em] = evt.end.split(':').map(Number);
-            let top = (sh - startHour) * 64 + (sm / 60) * 64;
-            let bottom = (eh - startHour) * 64 + (em / 60) * 64;
+            let top = (sh - startHour) * pxPerHour + (sm / 60) * pxPerHour;
+            let bottom = (eh - startHour) * pxPerHour + (em / 60) * pxPerHour;
             top = Math.max(0, top);
             bottom = Math.min(totalHeight, bottom);
-            const height = Math.max(bottom - top, 20);
+            const height = Math.max(bottom - top, 18);
             return `top: ${top}px; height: ${height}px; background-color: ${evt.color}; position: absolute;`;
         },
 
