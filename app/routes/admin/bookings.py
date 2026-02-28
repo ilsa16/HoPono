@@ -1,5 +1,5 @@
-from datetime import date, datetime
-from flask import Blueprint, render_template, request, redirect, url_for, flash, Response
+from datetime import date, datetime, timedelta
+from flask import Blueprint, render_template, request, redirect, url_for, flash, Response, jsonify
 from flask_login import login_required
 from app.extensions import db
 from app.models.booking import Booking
@@ -134,6 +134,50 @@ def _ics_fold(line):
         line = " " + line[cut:]
     result.append(line)
     return "\r\n".join(result)
+
+
+@admin_bookings_bp.route("/calendar-data")
+@login_required
+def calendar_data():
+    start_str = request.args.get("start")
+    end_str = request.args.get("end")
+    if not start_str or not end_str:
+        return jsonify([])
+
+    try:
+        start_date = date.fromisoformat(start_str)
+        end_date = date.fromisoformat(end_str)
+    except ValueError:
+        return jsonify([])
+
+    bookings = (
+        Booking.query.join(Client).join(Service)
+        .filter(Booking.date >= start_date, Booking.date <= end_date)
+        .order_by(Booking.date, Booking.start_time)
+        .all()
+    )
+
+    status_colors = {
+        "confirmed": "#3b82f6",
+        "completed": "#22c55e",
+        "cancelled": "#ef4444",
+        "no_show": "#9ca3af",
+    }
+
+    events = []
+    for b in bookings:
+        events.append({
+            "id": b.id,
+            "title": b.client.name,
+            "service": b.service.name,
+            "date": b.date.isoformat(),
+            "start": b.start_time.strftime("%H:%M"),
+            "end": b.end_time.strftime("%H:%M"),
+            "status": b.status,
+            "color": status_colors.get(b.status, "#6b7280"),
+        })
+
+    return jsonify(events)
 
 
 @admin_bookings_bp.route("/<int:booking_id>")

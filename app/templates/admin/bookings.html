@@ -3,99 +3,428 @@
 {% block page_title %}Bookings{% endblock %}
 
 {% block admin_content %}
-<div class="mb-6 flex flex-wrap gap-4 items-end">
-    <form method="GET" class="flex flex-wrap gap-3 items-end">
-        <div>
-            <label class="block text-xs text-gray-500 mb-1">Status</label>
-            <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                <option value="">All</option>
-                <option value="confirmed" {{ 'selected' if request.args.get('status') == 'confirmed' }}>Confirmed</option>
-                <option value="completed" {{ 'selected' if request.args.get('status') == 'completed' }}>Completed</option>
-                <option value="cancelled" {{ 'selected' if request.args.get('status') == 'cancelled' }}>Cancelled</option>
-                <option value="no_show" {{ 'selected' if request.args.get('status') == 'no_show' }}>No Show</option>
-            </select>
+<div x-data="bookingsPage()" x-init="init()">
+    <div class="mb-6 flex flex-wrap gap-3 items-center justify-between">
+        <div class="flex items-center gap-2">
+            <div class="inline-flex rounded-lg border border-gray-200 bg-white overflow-hidden">
+                <button @click="viewMode = 'list'" :class="viewMode === 'list' ? 'bg-hopono-blue text-white' : 'text-gray-600 hover:bg-gray-50'" class="px-3 py-2 text-sm font-medium transition flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                    <span class="hidden sm:inline">List</span>
+                </button>
+                <button @click="viewMode = 'calendar'" :class="viewMode === 'calendar' ? 'bg-hopono-blue text-white' : 'text-gray-600 hover:bg-gray-50'" class="px-3 py-2 text-sm font-medium transition flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span class="hidden sm:inline">Calendar</span>
+                </button>
+            </div>
         </div>
-        <div>
-            <label class="block text-xs text-gray-500 mb-1">From</label>
-            <input type="date" name="date_from" value="{{ request.args.get('date_from', '') }}"
-                   class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+
+        <div class="flex gap-2">
+            <a href="{{ url_for('admin_bookings.export_ics', status=request.args.get('status', ''), date_from=request.args.get('date_from', ''), date_to=request.args.get('date_to', ''), search=request.args.get('search', '')) }}"
+               class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                <span class="hidden sm:inline">Export</span>
+            </a>
+            <a href="{{ url_for('admin_bookings.new_booking') }}"
+               class="bg-hopono-gold text-hopono-blue-deeper px-3 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition">
+                + New
+            </a>
         </div>
-        <div>
-            <label class="block text-xs text-gray-500 mb-1">To</label>
-            <input type="date" name="date_to" value="{{ request.args.get('date_to', '') }}"
-                   class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+    </div>
+
+    <!-- LIST VIEW -->
+    <div x-show="viewMode === 'list'" x-cloak>
+        <div class="mb-4">
+            <form method="GET" class="flex flex-wrap gap-3 items-end">
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Status</label>
+                    <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <option value="">All</option>
+                        <option value="confirmed" {{ 'selected' if request.args.get('status') == 'confirmed' }}>Confirmed</option>
+                        <option value="completed" {{ 'selected' if request.args.get('status') == 'completed' }}>Completed</option>
+                        <option value="cancelled" {{ 'selected' if request.args.get('status') == 'cancelled' }}>Cancelled</option>
+                        <option value="no_show" {{ 'selected' if request.args.get('status') == 'no_show' }}>No Show</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">From</label>
+                    <input type="date" name="date_from" value="{{ request.args.get('date_from', '') }}"
+                           class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">To</label>
+                    <input type="date" name="date_to" value="{{ request.args.get('date_to', '') }}"
+                           class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Search</label>
+                    <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Name, email or phone"
+                           class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <button type="submit" class="bg-hopono-blue text-white px-4 py-2 rounded-lg text-sm hover:bg-hopono-blue-dark transition">
+                    Filter
+                </button>
+            </form>
         </div>
-        <div>
-            <label class="block text-xs text-gray-500 mb-1">Search</label>
-            <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Name, email or phone"
-                   class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 text-gray-600">
+                        <tr>
+                            <th class="px-4 py-3 text-left font-medium">Date</th>
+                            <th class="px-4 py-3 text-left font-medium">Time</th>
+                            <th class="px-4 py-3 text-left font-medium">Client</th>
+                            <th class="px-4 py-3 text-left font-medium hidden sm:table-cell">Phone</th>
+                            <th class="px-4 py-3 text-left font-medium">Service</th>
+                            <th class="px-4 py-3 text-left font-medium hidden sm:table-cell">Source</th>
+                            <th class="px-4 py-3 text-left font-medium">Status</th>
+                            <th class="px-4 py-3 text-left font-medium hidden md:table-cell">Payment</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {% for booking in bookings %}
+                        <tr class="hover:bg-gray-50 cursor-pointer" onclick="location.href='{{ url_for('admin_bookings.booking_detail', booking_id=booking.id) }}'">
+                            <td class="px-4 py-3 font-medium whitespace-nowrap">{{ booking.date.strftime('%d %b %Y') }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap">{{ booking.start_time.strftime('%H:%M') }}</td>
+                            <td class="px-4 py-3">{{ booking.client.name }}</td>
+                            <td class="px-4 py-3 text-gray-400 text-xs hidden sm:table-cell">{{ booking.client.phone or '—' }}</td>
+                            <td class="px-4 py-3 text-gray-500">{{ booking.service.name }}</td>
+                            <td class="px-4 py-3 hidden sm:table-cell">
+                                <span class="text-xs px-2 py-0.5 rounded-full {{ 'bg-blue-50 text-blue-600' if booking.source == 'online' else 'bg-orange-50 text-orange-600' }}">
+                                    {{ booking.source }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="text-xs font-medium px-2 py-0.5 rounded-full
+                                    {% if booking.status == 'confirmed' %}bg-blue-100 text-blue-700
+                                    {% elif booking.status == 'completed' %}bg-green-100 text-green-700
+                                    {% elif booking.status == 'cancelled' %}bg-red-100 text-red-700
+                                    {% else %}bg-gray-100 text-gray-600{% endif %}">
+                                    {{ booking.status|capitalize }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 hidden md:table-cell">
+                                {% if booking.payment %}
+                                <span class="text-green-600 text-xs">&euro;{{ "%.0f"|format(booking.payment.amount_eur) }} ({{ booking.payment.method }})</span>
+                                {% else %}
+                                <span class="text-gray-400 text-xs">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if not bookings %}
+            <div class="p-8 text-center text-gray-400">No bookings found.</div>
+            {% endif %}
         </div>
-        <button type="submit" class="bg-hopono-blue text-white px-4 py-2 rounded-lg text-sm hover:bg-hopono-blue-dark transition">
-            Filter
-        </button>
-    </form>
-    <div class="ml-auto flex gap-2">
-        <a href="{{ url_for('admin_bookings.export_ics', status=request.args.get('status', ''), date_from=request.args.get('date_from', ''), date_to=request.args.get('date_to', ''), search=request.args.get('search', '')) }}"
-           class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            Export to Calendar
-        </a>
-        <a href="{{ url_for('admin_bookings.new_booking') }}"
-           class="bg-hopono-gold text-hopono-blue-deeper px-4 py-2 rounded-lg text-sm font-semibold hover:bg-hopono-gold-light transition">
-            + New Booking
-        </a>
+    </div>
+
+    <!-- CALENDAR VIEW -->
+    <div x-show="viewMode === 'calendar'" x-cloak>
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <!-- Calendar Header -->
+            <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between gap-2 flex-wrap">
+                <div class="flex items-center gap-2">
+                    <button @click="goToToday()" class="px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                        Today
+                    </button>
+                    <button @click="navigate(-1)" class="p-1.5 rounded-lg hover:bg-gray-100 transition" aria-label="Previous">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                    <button @click="navigate(1)" class="p-1.5 rounded-lg hover:bg-gray-100 transition" aria-label="Next">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                    <h2 class="text-base sm:text-lg font-semibold text-gray-800 ml-1" x-text="headerLabel"></h2>
+                </div>
+                <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
+                    <button @click="setCalendarMode('day')" :class="calendarMode === 'day' ? 'bg-white shadow-sm' : ''" class="px-3 py-1 text-sm rounded-md transition">Day</button>
+                    <button @click="setCalendarMode('week')" :class="calendarMode === 'week' ? 'bg-white shadow-sm' : ''" class="px-3 py-1 text-sm rounded-md transition">Week</button>
+                </div>
+            </div>
+
+            <!-- Time Grid -->
+            <div class="relative overflow-x-auto" style="max-height: calc(100vh - 240px);" x-ref="calendarScroll">
+                <!-- Day Headers -->
+                <div class="sticky top-0 z-20 bg-white border-b border-gray-200">
+                    <div class="flex">
+                        <div class="w-14 sm:w-16 flex-shrink-0"></div>
+                        <template x-for="day in visibleDays" :key="day.dateStr">
+                            <div class="flex-1 min-w-[100px] text-center py-2 border-l border-gray-100"
+                                 :class="day.isToday ? 'bg-blue-50/50' : ''">
+                                <div class="text-xs text-gray-500 uppercase" x-text="day.dayName"></div>
+                                <div class="text-sm font-semibold mt-0.5"
+                                     :class="day.isToday ? 'bg-hopono-blue text-white w-7 h-7 rounded-full flex items-center justify-center mx-auto' : 'text-gray-800'"
+                                     x-text="day.dayNum"></div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Grid Body -->
+                <div class="flex relative" x-ref="gridBody">
+                    <!-- Time Labels -->
+                    <div class="w-14 sm:w-16 flex-shrink-0">
+                        <template x-for="hour in hours" :key="hour">
+                            <div class="h-16 relative">
+                                <span class="absolute -top-2 right-2 text-[10px] sm:text-xs text-gray-400" x-text="formatHourLabel(hour)"></span>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Day Columns -->
+                    <template x-for="day in visibleDays" :key="day.dateStr">
+                        <div class="flex-1 min-w-[100px] relative border-l border-gray-100"
+                             :class="day.isToday ? 'bg-blue-50/30' : ''">
+                            <template x-for="hour in hours" :key="hour">
+                                <div class="h-16 border-b border-gray-50 relative">
+                                    <div class="absolute top-0 left-0 right-0 h-px bg-gray-200" x-show="hour !== hours[0]"></div>
+                                    <div class="absolute top-8 left-0 right-0 h-px bg-gray-100 opacity-50"></div>
+                                </div>
+                            </template>
+
+                            <!-- Current time indicator -->
+                            <template x-if="day.isToday && currentTimeTop !== null">
+                                <div class="absolute left-0 right-0 z-10 pointer-events-none" :style="'top:' + currentTimeTop + 'px'">
+                                    <div class="flex items-center">
+                                        <div class="w-2.5 h-2.5 bg-red-500 rounded-full -ml-1"></div>
+                                        <div class="flex-1 h-0.5 bg-red-500"></div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Events -->
+                            <template x-for="evt in getEventsForDay(day.dateStr)" :key="evt.id">
+                                <button class="absolute left-0.5 right-0.5 sm:left-1 sm:right-1 rounded-md px-1.5 py-1 cursor-pointer overflow-hidden border border-white/20 hover:brightness-95 transition text-left focus:outline-none focus:ring-2 focus:ring-hopono-blue focus:ring-offset-1"
+                                     :style="getEventStyle(evt)"
+                                     @click="goToBooking(evt.id)"
+                                     :aria-label="evt.title + ' — ' + evt.service + ' at ' + evt.start">
+                                    <div class="text-[10px] sm:text-xs font-semibold text-white truncate" x-text="evt.title"></div>
+                                    <div class="text-[9px] sm:text-[10px] text-white/80 truncate" x-text="evt.start + ' – ' + evt.end"></div>
+                                    <div class="text-[9px] sm:text-[10px] text-white/70 truncate hidden sm:block" x-text="evt.service"></div>
+                                </button>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Loading overlay -->
+                <div x-show="loading" class="absolute inset-0 bg-white/60 flex items-center justify-center z-30">
+                    <div class="flex items-center gap-2 text-gray-500 text-sm">
+                        <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        Loading...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Legend -->
+            <div class="px-4 py-2 border-t border-gray-200 flex flex-wrap gap-3 text-xs text-gray-500">
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-blue-500"></span>Confirmed</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-green-500"></span>Completed</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-red-500"></span>Cancelled</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-gray-400"></span>No Show</span>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-    <table class="w-full text-sm">
-        <thead class="bg-gray-50 text-gray-600">
-            <tr>
-                <th class="px-4 py-3 text-left font-medium">Date</th>
-                <th class="px-4 py-3 text-left font-medium">Time</th>
-                <th class="px-4 py-3 text-left font-medium">Client</th>
-                <th class="px-4 py-3 text-left font-medium">Phone</th>
-                <th class="px-4 py-3 text-left font-medium">Service</th>
-                <th class="px-4 py-3 text-left font-medium">Source</th>
-                <th class="px-4 py-3 text-left font-medium">Status</th>
-                <th class="px-4 py-3 text-left font-medium">Payment</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-            {% for booking in bookings %}
-            <tr class="hover:bg-gray-50 cursor-pointer" onclick="location.href='{{ url_for('admin_bookings.booking_detail', booking_id=booking.id) }}'">
-                <td class="px-4 py-3 font-medium">{{ booking.date.strftime('%d %b %Y') }}</td>
-                <td class="px-4 py-3">{{ booking.start_time.strftime('%H:%M') }}</td>
-                <td class="px-4 py-3">{{ booking.client.name }}</td>
-                <td class="px-4 py-3 text-gray-400 text-xs">{{ booking.client.phone or '—' }}</td>
-                <td class="px-4 py-3 text-gray-500">{{ booking.service.name }}</td>
-                <td class="px-4 py-3">
-                    <span class="text-xs px-2 py-0.5 rounded-full {{ 'bg-blue-50 text-blue-600' if booking.source == 'online' else 'bg-orange-50 text-orange-600' }}">
-                        {{ booking.source }}
-                    </span>
-                </td>
-                <td class="px-4 py-3">
-                    <span class="text-xs font-medium px-2 py-0.5 rounded-full
-                        {% if booking.status == 'confirmed' %}bg-blue-100 text-blue-700
-                        {% elif booking.status == 'completed' %}bg-green-100 text-green-700
-                        {% elif booking.status == 'cancelled' %}bg-red-100 text-red-700
-                        {% else %}bg-gray-100 text-gray-600{% endif %}">
-                        {{ booking.status|capitalize }}
-                    </span>
-                </td>
-                <td class="px-4 py-3">
-                    {% if booking.payment %}
-                    <span class="text-green-600 text-xs">&euro;{{ "%.0f"|format(booking.payment.amount_eur) }} ({{ booking.payment.method }})</span>
-                    {% else %}
-                    <span class="text-gray-400 text-xs">—</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% if not bookings %}
-    <div class="p-8 text-center text-gray-400">No bookings found.</div>
-    {% endif %}
-</div>
+<style>
+    [x-cloak] { display: none !important; }
+</style>
+
+<script>
+function bookingsPage() {
+    return {
+        viewMode: 'list',
+        calendarMode: window.innerWidth < 640 ? 'day' : 'week',
+        currentDate: new Date(),
+        events: [],
+        loading: false,
+        hours: [],
+        currentTimeTop: null,
+        _timeInterval: null,
+
+        init() {
+            this.hours = [];
+            for (let h = 8; h <= 21; h++) this.hours.push(h);
+
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('view') === 'calendar') this.viewMode = 'calendar';
+
+            this.$watch('viewMode', (val) => {
+                if (val === 'calendar') this.loadEvents();
+            });
+            this.$watch('calendarMode', () => this.loadEvents());
+            this.$watch('currentDate', () => this.loadEvents());
+
+            window.addEventListener('resize', () => {
+                if (window.innerWidth < 640 && this.calendarMode === 'week') {
+                    this.calendarMode = 'day';
+                }
+            });
+
+            if (this.viewMode === 'calendar') this.loadEvents();
+
+            this.updateCurrentTime();
+            this._timeInterval = setInterval(() => this.updateCurrentTime(), 60000);
+        },
+
+        get visibleDays() {
+            const days = [];
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (this.calendarMode === 'day') {
+                const d = new Date(this.currentDate);
+                d.setHours(0, 0, 0, 0);
+                days.push(this._makeDayObj(d, today));
+            } else {
+                const start = this._weekStart(this.currentDate);
+                for (let i = 0; i < 7; i++) {
+                    const d = new Date(start);
+                    d.setDate(d.getDate() + i);
+                    days.push(this._makeDayObj(d, today));
+                }
+            }
+            return days;
+        },
+
+        get headerLabel() {
+            if (this.calendarMode === 'day') {
+                return this.currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+            }
+            const start = this._weekStart(this.currentDate);
+            const end = new Date(start);
+            end.setDate(end.getDate() + 6);
+            const sMonth = start.toLocaleDateString('en-US', { month: 'short' });
+            const eMonth = end.toLocaleDateString('en-US', { month: 'short' });
+            const year = end.getFullYear();
+            if (sMonth === eMonth) {
+                return `${sMonth} ${start.getDate()} – ${end.getDate()}, ${year}`;
+            }
+            return `${sMonth} ${start.getDate()} – ${eMonth} ${end.getDate()}, ${year}`;
+        },
+
+        _makeDayObj(d, today) {
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            return {
+                dateStr: this._toISO(d),
+                dayName: dayNames[d.getDay()],
+                dayNum: d.getDate(),
+                isToday: d.getTime() === today.getTime(),
+            };
+        },
+
+        _weekStart(d) {
+            const s = new Date(d);
+            s.setHours(0, 0, 0, 0);
+            const day = s.getDay();
+            const diff = day === 0 ? -6 : 1 - day;
+            s.setDate(s.getDate() + diff);
+            return s;
+        },
+
+        _toISO(d) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${dd}`;
+        },
+
+        setCalendarMode(mode) {
+            this.calendarMode = mode;
+        },
+
+        navigate(dir) {
+            const d = new Date(this.currentDate);
+            if (this.calendarMode === 'day') {
+                d.setDate(d.getDate() + dir);
+            } else {
+                d.setDate(d.getDate() + dir * 7);
+            }
+            this.currentDate = d;
+        },
+
+        goToToday() {
+            this.currentDate = new Date();
+            this.$nextTick(() => this.scrollToCurrentTime());
+        },
+
+        scrollToCurrentTime() {
+            if (this.currentTimeTop !== null && this.$refs.calendarScroll) {
+                this.$refs.calendarScroll.scrollTop = Math.max(0, this.currentTimeTop - 100);
+            }
+        },
+
+        updateCurrentTime() {
+            const now = new Date();
+            const h = now.getHours();
+            const m = now.getMinutes();
+            const startHour = this.hours[0];
+            const endHour = this.hours[this.hours.length - 1] + 1;
+            if (h >= startHour && h < endHour) {
+                this.currentTimeTop = (h - startHour) * 64 + (m / 60) * 64;
+            } else {
+                this.currentTimeTop = null;
+            }
+        },
+
+        formatHourLabel(h) {
+            return String(h).padStart(2, '0') + ':00';
+        },
+
+        async loadEvents() {
+            this.loading = true;
+            let startDate, endDate;
+            if (this.calendarMode === 'day') {
+                startDate = this._toISO(this.currentDate);
+                endDate = startDate;
+            } else {
+                const ws = this._weekStart(this.currentDate);
+                const we = new Date(ws);
+                we.setDate(we.getDate() + 6);
+                startDate = this._toISO(ws);
+                endDate = this._toISO(we);
+            }
+
+            try {
+                const resp = await fetch(`/admin/bookings/calendar-data?start=${startDate}&end=${endDate}`);
+                this.events = await resp.json();
+            } catch (e) {
+                console.error('Failed to load calendar events', e);
+                this.events = [];
+            }
+            this.loading = false;
+
+            this.$nextTick(() => this.scrollToCurrentTime());
+        },
+
+        getEventsForDay(dateStr) {
+            return this.events.filter(e => e.date === dateStr);
+        },
+
+        getEventStyle(evt) {
+            const startHour = this.hours[0];
+            const endHour = this.hours[this.hours.length - 1] + 1;
+            const totalHeight = (endHour - startHour) * 64;
+            const [sh, sm] = evt.start.split(':').map(Number);
+            const [eh, em] = evt.end.split(':').map(Number);
+            let top = (sh - startHour) * 64 + (sm / 60) * 64;
+            let bottom = (eh - startHour) * 64 + (em / 60) * 64;
+            top = Math.max(0, top);
+            bottom = Math.min(totalHeight, bottom);
+            const height = Math.max(bottom - top, 20);
+            return `top: ${top}px; height: ${height}px; background-color: ${evt.color}; position: absolute;`;
+        },
+
+        goToBooking(id) {
+            window.location.href = `/admin/bookings/${id}`;
+        },
+    };
+}
+</script>
 {% endblock %}

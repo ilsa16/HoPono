@@ -91,6 +91,8 @@ migrations/             # Alembic migration files
 ### Admin
 - `/admin/login` — Admin login
 - `/admin/dashboard` — Dashboard with stats
+- `/admin/bookings/` — Bookings list + calendar view (toggle between list/calendar)
+- `/admin/bookings/calendar-data?start=YYYY-MM-DD&end=YYYY-MM-DD` — Calendar events JSON API
 - `/admin/availability/` — Mobile-first weekly availability manager
 - `/admin/availability/api/week?start=YYYY-MM-DD` — Week availability JSON
 - `/admin/availability/api/add` — Add availability window (POST JSON)
