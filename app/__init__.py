@@ -1,11 +1,17 @@
 import logging
 import os
+import threading
+import time as _time
 from flask import Flask, abort, render_template, request
 from werkzeug.middleware.proxy_fix import ProxyFix
 from .config import config
 from .extensions import db, migrate, login_manager, csrf, limiter
 
 logger = logging.getLogger(__name__)
+
+_last_reminder_check = 0
+_reminder_lock = threading.Lock()
+_REMINDER_THROTTLE_SECONDS = 300
 
 _BLOCKED_PREFIXES = (
     "/wp-admin", "/wp-login", "/wp-content", "/wp-includes",
@@ -93,5 +99,24 @@ def create_app(config_name=None):
     if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         from .tasks.scheduler import init_scheduler
         init_scheduler(app)
+
+    @app.before_request
+    def _trigger_reminder_check():
+        if not request.path.startswith("/admin/"):
+            return
+        global _last_reminder_check
+        now = _time.time()
+        if now - _last_reminder_check < _REMINDER_THROTTLE_SECONDS:
+            return
+        if not _reminder_lock.acquire(blocking=False):
+            return
+        try:
+            _last_reminder_check = now
+            from .tasks.send_reminders import check_and_send_reminders
+            t = threading.Thread(target=check_and_send_reminders, args=(app,), daemon=True)
+            t.start()
+            logger.info("Triggered background reminder check from admin request")
+        finally:
+            _reminder_lock.release()
 
     return app

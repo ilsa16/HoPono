@@ -1,6 +1,8 @@
 import logging
+import threading
 from datetime import datetime, timedelta
 import pytz
+from sqlalchemy.exc import IntegrityError
 from app.extensions import db
 from app.models.booking import Booking
 from app.models.reminder_log import ReminderLog
@@ -15,6 +17,7 @@ from app.services.reminder_service import (
 logger = logging.getLogger(__name__)
 
 CYPRUS_TZ = pytz.timezone("Europe/Nicosia")
+_check_lock = threading.Lock()
 
 
 def _log_reminder(booking_id, rtype, success, error_msg=None):
@@ -88,6 +91,16 @@ def _attempt_reminder(booking, client, service, time_str, date_str,
 
 
 def check_and_send_reminders(app):
+    if not _check_lock.acquire(blocking=False):
+        logger.info("Reminder check already in progress, skipping")
+        return
+    try:
+        _do_check_and_send(app)
+    finally:
+        _check_lock.release()
+
+
+def _do_check_and_send(app):
     with app.app_context():
         setting = db.session.get(Setting, "reminder_hours_before")
         hours_before = int(setting.value) if setting else 24
@@ -109,8 +122,12 @@ def check_and_send_reminders(app):
             email_enabled,
         )
 
-        window_end = target + timedelta(minutes=15)
-        dates_to_check = {now_cyprus.date(), target.date(), window_end.date()}
+        window_end = target + timedelta(hours=12)
+        date_cursor = now_cyprus.date()
+        dates_to_check = set()
+        while date_cursor <= window_end.date():
+            dates_to_check.add(date_cursor)
+            date_cursor += timedelta(days=1)
 
         bookings = (
             Booking.query.filter(
@@ -130,13 +147,13 @@ def check_and_send_reminders(app):
         for booking in bookings:
             booking_dt = datetime.combine(booking.date, booking.start_time)
 
-            if not (now_cyprus < booking_dt <= target + timedelta(minutes=15)):
+            if not (now_cyprus < booking_dt <= window_end):
                 logger.debug(
                     "Booking #%d at %s outside reminder window (%s to %s), skipping",
                     booking.id,
                     booking_dt.strftime("%Y-%m-%d %H:%M"),
-                    now_cyprus.strftime("%H:%M"),
-                    (target + timedelta(minutes=15)).strftime("%H:%M"),
+                    now_cyprus.strftime("%Y-%m-%d %H:%M"),
+                    window_end.strftime("%Y-%m-%d %H:%M"),
                 )
                 continue
 
@@ -167,7 +184,13 @@ def check_and_send_reminders(app):
                 sms_enabled, email_enabled,
             )
             if success:
-                sent_count += 1
+                try:
+                    db.session.commit()
+                    sent_count += 1
+                except IntegrityError:
+                    db.session.rollback()
+                    logger.info("Booking #%d reminder already sent (concurrent), skipping", booking.id)
+            else:
+                db.session.commit()
 
-        db.session.commit()
         logger.info("Reminder check completed. Processed %d bookings, sent %d reminders.", len(bookings), sent_count)
