@@ -16,14 +16,6 @@ class Config:
     SESSION_COOKIE_SAMESITE = "Lax"
     PERMANENT_SESSION_LIFETIME = 3600
 
-    TELNYX_API_KEY = os.environ.get("TELNYX_API_KEY")
-    TELNYX_PHONE_NUMBER = os.environ.get("TELNYX_PHONE_NUMBER")
-
-    SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
-    SENDGRID_FROM_EMAIL = os.environ.get(
-        "SENDGRID_FROM_EMAIL", "bookings@hoponomassage.com"
-    )
-
     @staticmethod
     def init_app(app):
         if not app.config.get("SECRET_KEY"):

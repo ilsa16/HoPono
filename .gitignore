@@ -4,6 +4,7 @@ __pycache__/
 *.so
 .env
 *.db
+*.log
 instance/
 .webassets-cache
 venv/
@@ -13,3 +14,10 @@ dist/
 build/
 .eggs/
 .claude/
+.local/
+.replit
+.cache/
+.upm/
+.pythonlibs/
+attached_assets/
+/tmp/

@@ -17,7 +17,12 @@ def seed():
     with app.app_context():
         # Create admin user
         username = os.environ.get("ADMIN_USERNAME", "hopono")
-        password = os.environ.get("ADMIN_PASSWORD", "Hopono2026!")
+        password = os.environ.get("ADMIN_PASSWORD")
+        if not password:
+            raise RuntimeError(
+                "ADMIN_PASSWORD environment variable is required. "
+                "Set it before running seed.py."
+            )
 
         if not AdminUser.query.filter_by(username=username).first():
             admin = AdminUser(

@@ -112,7 +112,7 @@ migrations/             # Alembic migration files
 - `ADMIN_USERNAME` / `ADMIN_PASSWORD` — Used by seed.py
 - `SENDTO_API_KEY` — Send.to (sms.to) API key for SMS reminders (sender_id: "HoPono")
 - `BREVO_API_KEY` — Brevo API key for transactional email reminders
-- `BREVO_FROM_EMAIL` — Optional sender email (default: bookings@hoponomassage.com)
+- `BREVO_FROM_EMAIL` — Optional sender email (default: noreply@hoponomassage.com)
 
 ## Running
 The app runs via `flask db upgrade && python run.py` on port 5000. Database migrations auto-run on startup.

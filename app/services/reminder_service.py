@@ -47,7 +47,7 @@ def send_email(to_email, subject, html_content):
     """Send an email via Brevo SMTP relay."""
     smtp_login = os.environ.get("BREVO_SMTP_LOGIN")
     smtp_password = os.environ.get("BREVO_API_KEY")
-    from_email = os.environ.get("BREVO_FROM_EMAIL", "velt.digitalsolutions@gmail.com")
+    from_email = os.environ.get("BREVO_FROM_EMAIL", "noreply@hoponomassage.com")
     from_name = "HoPono Massage"
 
     if not smtp_login or not smtp_password:
