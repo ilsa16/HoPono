@@ -86,8 +86,8 @@ migrations/             # Alembic migration files
 - `/services` — Service listing
 - `/book` — Standalone booking flow (fallback)
 - `/book/slots?service_id=X&date=YYYY-MM-DD` — Available slots API
-- `/book/calendar/<booking_id>.ics` — Download ICS calendar file for a booking
-- `/book/success/<booking_id>` — Booking confirmation with Add to Calendar buttons
+- `/book/calendar/<token>.ics` — Download ICS calendar file for a booking (UUID token)
+- `/book/success/<token>` — Booking confirmation with Add to Calendar buttons (UUID token)
 
 ### Admin
 - `/admin/login` — Admin login

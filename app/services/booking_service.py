@@ -1,4 +1,5 @@
 import re
+import uuid
 from datetime import datetime, timedelta
 from app.extensions import db
 from app.models.booking import Booking
@@ -44,6 +45,7 @@ def create_booking(
     coupon_code=None,
     source="online",
     marketing_consent=False,
+    gdpr_consent=True,
 ):
     client_name, client_email, client_phone = _validate_inputs(
         client_name, client_email, client_phone
@@ -64,6 +66,9 @@ def create_booking(
         client.name = client_name
         client.phone = client_phone
         client.reminder_preference = reminder_preference
+        if gdpr_consent:
+            client.gdpr_consent = True
+            client.gdpr_consented_at = datetime.utcnow()
         if marketing_consent and not client.marketing_consent:
             client.marketing_consent = True
             client.marketing_consented_at = datetime.utcnow()
@@ -103,6 +108,7 @@ def create_booking(
             apply_coupon(coupon_code)
 
     booking = Booking(
+        confirmation_token=str(uuid.uuid4()),
         client_id=client.id,
         service_id=service_id,
         date=datetime.strptime(date, "%Y-%m-%d").date(),

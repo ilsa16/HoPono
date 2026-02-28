@@ -65,29 +65,30 @@ def confirm():
             reminder_preference=request.form.get("reminder_preference", "email"),
             coupon_code=request.form.get("coupon_code"),
             marketing_consent=bool(request.form.get("marketing_consent")),
+            gdpr_consent=bool(request.form.get("gdpr_consent")),
         )
-        return redirect(url_for("booking.success", booking_id=booking.id))
+        return redirect(url_for("booking.success", token=booking.confirmation_token))
     except ValueError as e:
         flash(str(e), "error")
         return redirect(url_for("booking.select_service"))
 
 
-@booking_bp.route("/success/<int:booking_id>")
-def success(booking_id):
-    booking = Booking.query.get_or_404(booking_id)
+@booking_bp.route("/success/<token>")
+def success(token):
+    booking = Booking.query.filter_by(confirmation_token=token).first_or_404()
     gcal_url = google_calendar_url(booking)
     outlook_url = outlook_calendar_url(booking)
     return render_template("booking/confirmation.html", booking=booking, gcal_url=gcal_url, outlook_url=outlook_url)
 
 
-@booking_bp.route("/calendar/<int:booking_id>.ics")
-def download_ics(booking_id):
-    booking = Booking.query.get_or_404(booking_id)
+@booking_bp.route("/calendar/<token>.ics")
+def download_ics(token):
+    booking = Booking.query.filter_by(confirmation_token=token).first_or_404()
     ics_content = generate_ics(booking)
     return Response(
         ics_content,
         mimetype="text/calendar",
-        headers={"Content-Disposition": f"attachment; filename=hopono-booking-{booking_id}.ics"}
+        headers={"Content-Disposition": f"attachment; filename=hopono-booking-{token}.ics"}
     )
 
 

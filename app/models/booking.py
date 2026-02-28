@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from app.extensions import db
 
@@ -7,6 +8,7 @@ class Booking(db.Model):
     __table_args__ = (db.Index("ix_bookings_date_status", "date", "status"),)
 
     id = db.Column(db.Integer, primary_key=True)
+    confirmation_token = db.Column(db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
     client_id = db.Column(db.Integer, db.ForeignKey("clients.id"), nullable=False)
     service_id = db.Column(db.Integer, db.ForeignKey("services.id"), nullable=False)
     date = db.Column(db.Date, nullable=False)

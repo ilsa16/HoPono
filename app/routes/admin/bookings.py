@@ -201,6 +201,7 @@ def new_booking():
                 client_phone=request.form.get("country_code", "+357") + request.form.get("phone", ""),
                 reminder_preference=request.form.get("reminder_preference", "email"),
                 source="manual",
+                gdpr_consent=True,
             )
             flash("Booking created successfully.", "success")
             return redirect(url_for("admin_bookings.booking_detail", booking_id=booking.id))
